@@ -33,6 +33,7 @@ export default async function WallpaperPage({ params }: Params) {
 
   return (
     <Viewer
+      id={w.id}
       title={w.name}
       category={category}
       note={w.note}

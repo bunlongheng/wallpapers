@@ -11,6 +11,7 @@ type Neighbour = { id: string; name: string };
  * so the frame can be screenshotted clean, and comes back on any input.
  */
 export function Viewer({
+  id,
   title,
   category,
   note,
@@ -20,6 +21,8 @@ export function Viewer({
   next,
   children,
 }: {
+  /** This plate's own id, used to ignore keys meant for the plate we just left. */
+  id: string;
   title: string;
   category: string;
   note: string;
@@ -59,6 +62,10 @@ export function Viewer({
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+      // A second press can land after the next plate has painted but before this
+      // listener has been swapped for its one. Without this guard that press is
+      // handled with the previous plate's neighbours and jumps somewhere wrong.
+      if (window.location.pathname !== `/w/${id}`) return;
       if (e.key === "ArrowLeft") router.push(`/w/${prev.id}`);
       else if (e.key === "ArrowRight") router.push(`/w/${next.id}`);
       else if (e.key === "Escape") router.push("/");
@@ -66,7 +73,7 @@ export function Viewer({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [router, prev.id, next.id, wake]);
+  }, [router, id, prev.id, next.id, wake]);
 
   return (
     <main

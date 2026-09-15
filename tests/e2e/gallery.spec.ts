@@ -67,8 +67,10 @@ test("a plate opens full-bleed and walks forward with the keyboard", async ({ pa
   await expect(page).toHaveURL(/\/w\/cobalt-bloom$/);
   await expect(page.getByRole("heading", { name: "Cobalt Bloom" })).toBeVisible();
 
+  // Pressed straight away: the previous plate's listener must not handle this.
   await page.keyboard.press("ArrowLeft");
   await expect(page).toHaveURL(/\/w\/solar-drift$/);
+  await expect(page.getByRole("heading", { name: "Solar Drift" })).toBeVisible();
 });
 
 test("Escape returns to the index", async ({ page }) => {
