@@ -271,6 +271,10 @@ The Mono category's armoured-helm plates (Vanguard, Sentry Row, Helm Close) are 
 geometry drawn for this project. They are not a likeness of any existing character,
 costume or trademarked design.
 
+## Changelog
+
+[CHANGELOG.md](CHANGELOG.md).
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) - adding a wallpaper is one object in one array,
