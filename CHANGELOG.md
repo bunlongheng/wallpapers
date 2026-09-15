@@ -38,9 +38,11 @@ Audit pass across ten lenses, then a verification pass on the fixes.
   scene carrying an option it never reads, is now a compile error rather than a silent
   no-op.
 - `lib/wallpapers.ts` is a small entry point over per-category modules in `lib/recipes/`.
-- Lighthouse performance went 83 to 96-99: `content-visibility` on the tiles, an
-  opacity-only reveal on the first row only, one preloaded font weight, and the header
-  icon off the optimiser path.
+- Lighthouse performance went 83 to 96-99: an opacity-only reveal on the first row only,
+  one preloaded font weight, and the header icon off both the preload and the optimiser
+  paths. `content-visibility` on the tiles was tried and removed - measured across three
+  runs each way it changed nothing, and it stops off-screen plates being painted into a
+  full-page screenshot, which is what this site is for.
 - Every PNG in the repo recompressed: 2.37 MB to 538 KB.
 
 ## 1.0.0 - 2026-09-15

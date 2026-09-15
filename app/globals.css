@@ -84,6 +84,15 @@ body {
   }
 
   /*
+    No content-visibility on the tiles, deliberately. It reads like the obvious win for a
+    40-tile grid, but measured against this build it moved nothing: 97 / 94 / 97 without
+    it against 94 / 97 / 97 with it, same LCP and Speed Index either way. The load-time
+    gain came from the opacity-only reveal, the single preloaded font weight and taking
+    the header icon off the optimiser path. What it did cost was real - a skipped subtree
+    is not painted into a full-page screenshot, and screenshots are what this site is for.
+  */
+
+  /*
     Category filtering is pure CSS - the recipes never have to reach the client. One
     negation rule per category, so there is no second rule to lose a specificity fight
     with. `data-filter="all"` matches none of them and everything stays visible.
@@ -93,16 +102,6 @@ body {
   [data-filter="leather"] [data-cat]:not([data-cat="leather"]),
   [data-filter="mono"] [data-cat]:not([data-cat="mono"]) {
     display: none;
-  }
-
-  /*
-    Only a few tiles are on screen at once, but all 40 are in the document. This lets the
-    browser skip layout and paint for the off-screen ones until they scroll in, which is
-    what the LCP frame was waiting on.
-  */
-  [data-cat] {
-    content-visibility: auto;
-    contain-intrinsic-size: auto 380px 280px;
   }
 
   .plate {
