@@ -117,12 +117,23 @@ https://wallpapers-bheng.vercel.app/?demo=true&theme=nature
 | `theme` | `aurora`, `nature`, `leather`, `mono` | all 40 plates | Rotates only that category's ten plates |
 | `info` | `false` or `0` to hide | shown | The city / time / weather overlay |
 | `unit` | `c` or `f` | `f` | Temperature unit |
+| `city` | any place name | the browser timezone's city | Which city to label and forecast |
+| `region` | a state or region name | - | Disambiguates a name - there are six Pelhams in the US |
+| `lat` / `lon` | coordinates | - | Skips the lookup entirely; pair with `city` for the label |
 
 An unrecognised `theme` falls back to the whole catalogue rather than erroring, so a
 typo degrades to something that still works.
 
-**Where the city and weather come from.** The location is read from the browser's own
-IANA timezone (`America/Phoenix` becomes "Phoenix") and geocoded by
+**Pinning a city.** The timezone only ever gives you the zone's representative city, so
+`America/New_York` says "New York" whoever you are. Name your own instead:
+
+```
+/?demo=true&city=Pelham&region=New Hampshire
+/?demo=true&lat=42.73453&lon=-71.32451&city=Pelham    # exact, no lookup
+```
+
+**Where the city and weather come from by default.** The location is read from the
+browser's own IANA timezone (`America/Phoenix` becomes "Phoenix") and geocoded by
 [Open-Meteo](https://open-meteo.com), which needs no key and no `navigator.geolocation`
 prompt - that matters, because this usually runs inside someone else's iframe where a
 permission prompt would be hostile. Nothing personal is sent.

@@ -38,15 +38,30 @@ function describe(code: number): string {
   return "Storm";
 }
 
-async function locate(signal: AbortSignal) {
-  const city = cityFromTimezone();
-  if (!city) return null;
+export type Place = {
+  /** Search term. Falls back to the browser timezone's own city. */
+  city?: string;
+  /** Disambiguates a name that exists in several states - "Pelham" is in six. */
+  region?: string;
+  lat?: number;
+  lon?: number;
+};
+
+async function locate(place: Place, signal: AbortSignal) {
+  const name = place.city ?? cityFromTimezone();
+  if (!name) return null;
+  // Ask for several, because the first hit for a common name is rarely the right one.
   const res = await fetch(
-    `https://geocoding-api.open-meteo.com/v1/search?count=1&name=${encodeURIComponent(city)}`,
+    `https://geocoding-api.open-meteo.com/v1/search?count=10&name=${encodeURIComponent(name)}`,
     { signal },
   );
   if (!res.ok) return null;
-  return (await res.json())?.results?.[0] ?? null;
+  const hits: { name: string; admin1?: string; latitude: number; longitude: number }[] =
+    (await res.json())?.results ?? [];
+  if (!hits.length) return null;
+  if (!place.region) return hits[0];
+  const want = place.region.toLowerCase();
+  return hits.find((h) => h.admin1?.toLowerCase().includes(want)) ?? hits[0];
 }
 
 async function forecast(lat: number, lon: number, signal: AbortSignal): Promise<Weather | null> {
@@ -60,9 +75,9 @@ async function forecast(lat: number, lon: number, signal: AbortSignal): Promise<
   return { tempC: now.temperature_2m, code: now.weather_code ?? 0 };
 }
 
-export function DemoClock({ unit }: { unit: "c" | "f" }) {
+export function DemoClock({ unit, place }: { unit: "c" | "f"; place: Place }) {
   const [now, setNow] = useState(() => new Date());
-  const [city, setCity] = useState<string | null>(() => cityFromTimezone());
+  const [city, setCity] = useState<string | null>(() => place.city ?? cityFromTimezone());
   const [weather, setWeather] = useState<Weather | null>(null);
 
   useEffect(() => {
@@ -70,18 +85,24 @@ export function DemoClock({ unit }: { unit: "c" | "f" }) {
     return () => clearInterval(tick);
   }, []);
 
+  const { city: pin, region, lat, lon } = place;
   useEffect(() => {
     const stop = new AbortController();
     (async () => {
-      const place = await locate(stop.signal);
-      if (!place) return;
-      setCity(place.name);
-      setWeather(await forecast(place.latitude, place.longitude, stop.signal));
+      // Explicit coordinates skip the lookup entirely - nothing to get wrong.
+      if (lat !== undefined && lon !== undefined) {
+        setWeather(await forecast(lat, lon, stop.signal));
+        return;
+      }
+      const found = await locate({ city: pin, region }, stop.signal);
+      if (!found) return;
+      setCity(found.name);
+      setWeather(await forecast(found.latitude, found.longitude, stop.signal));
     })().catch(() => {
       /* offline, blocked, or rate-limited - city and clock stand on their own */
     });
     return () => stop.abort();
-  }, []);
+  }, [pin, region, lat, lon]);
 
   const time = now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   const date = now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" });

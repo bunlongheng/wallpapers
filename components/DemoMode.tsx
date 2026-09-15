@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DemoClock } from "@/components/DemoClock";
+import { DemoClock, type Place } from "@/components/DemoClock";
 import { Wallpaper } from "@/components/Wallpaper";
 import { CATEGORIES, type CategoryId } from "@/lib/categories";
 import { WALLPAPERS, wallpapersIn } from "@/lib/wallpapers";
@@ -24,10 +24,12 @@ export default function DemoMode({
   theme,
   info,
   unit,
+  place,
 }: {
   theme: string | null;
   info: boolean;
   unit: "c" | "f";
+  place: Place;
 }) {
   const plates = isCategory(theme) ? wallpapersIn(theme) : WALLPAPERS;
   const [at, setAt] = useState(0);
@@ -56,7 +58,7 @@ export default function DemoMode({
         vertically instead of on top of each other.
       */}
       {info && <div className="demo-scrim" aria-hidden="true" />}
-      {info && <DemoClock unit={unit} />}
+      {info && <DemoClock unit={unit} place={place} />}
       {plates.map((w, i) => (
         <div
           key={w.id}

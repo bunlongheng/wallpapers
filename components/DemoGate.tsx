@@ -25,5 +25,14 @@ export function DemoGate() {
 
   const info = !["false", "0"].includes(params.get("info") ?? "");
   const unit = params.get("unit") === "c" ? "c" : "f";
-  return <DemoMode theme={params.get("theme")} info={info} unit={unit} />;
+
+  const num = (v: string | null) => (v !== null && v.trim() !== "" && !Number.isNaN(Number(v)) ? Number(v) : undefined);
+  const place = {
+    city: params.get("city") ?? undefined,
+    region: params.get("region") ?? undefined,
+    lat: num(params.get("lat")),
+    lon: num(params.get("lon")),
+  };
+
+  return <DemoMode theme={params.get("theme")} info={info} unit={unit} place={place} />;
 }

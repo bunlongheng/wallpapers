@@ -272,6 +272,55 @@ test.describe("demo mode lock screen", () => {
     await expect(page.locator(".demo-weather")).toHaveCount(0);
   });
 
+  test("&city with &region picks the right one of six Pelhams", async ({ page }) => {
+    let asked = "";
+    await page.route("**/geocoding-api.open-meteo.com/**", (r) => {
+      asked = r.request().url();
+      r.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({
+          results: [
+            { name: "Pelham", admin1: "Alabama", latitude: 33.28, longitude: -86.8 },
+            { name: "Pelham", admin1: "New Hampshire", latitude: 42.73, longitude: -71.32 },
+          ],
+        }),
+      });
+    });
+    let forecastFor = "";
+    await page.route("**/api.open-meteo.com/**", (r) => {
+      forecastFor = r.request().url();
+      r.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({ current: { temperature_2m: 18, weather_code: 0 } }),
+      });
+    });
+
+    await page.goto("/?demo=true&city=Pelham&region=New%20Hampshire");
+    await expect(page.locator(".demo-city")).toHaveText("Pelham");
+    await expect(page.locator(".demo-weather")).toBeVisible();
+
+    expect(asked).toContain("name=Pelham");
+    // Alabama is first in the results, so this proves the region actually filtered.
+    expect(forecastFor).toContain("latitude=42.73");
+  });
+
+  test("&lat / &lon skip the lookup entirely", async ({ page }) => {
+    await page.route("**/geocoding-api.open-meteo.com/**", (r) => r.abort());
+    let forecastFor = "";
+    await page.route("**/api.open-meteo.com/**", (r) => {
+      forecastFor = r.request().url();
+      r.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({ current: { temperature_2m: 18, weather_code: 0 } }),
+      });
+    });
+
+    await page.goto("/?demo=true&lat=42.73453&lon=-71.32451&city=Pelham");
+    await expect(page.locator(".demo-city")).toHaveText("Pelham");
+    await expect(page.locator(".demo-weather")).toHaveText("64°F · Clear");
+    expect(forecastFor).toContain("latitude=42.73453");
+  });
+
   test("&info=0 gives a bare backdrop", async ({ page }) => {
     await withWeather(page);
     await page.goto("/?demo=true&info=0");
