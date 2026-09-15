@@ -6,7 +6,7 @@
 
 **40 wallpapers. 4 categories. Zero image files.**
 
-**[Open the gallery →](https://wallpapers-roan.vercel.app)**
+**[Open the gallery →](https://wallpapers-bheng.vercel.app)**
 
 <img src="docs/gallery.png" alt="The wallpapers index - a contact sheet of 40 plates" width="820">
 
@@ -230,7 +230,7 @@ Vercel picks up `vercel.json` as-is:
 | Output | `.next` |
 | Env vars | none required |
 
-Live at **[https://wallpapers-roan.vercel.app](https://wallpapers-roan.vercel.app)**.
+Live at **[https://wallpapers-bheng.vercel.app](https://wallpapers-bheng.vercel.app)**.
 
 ```bash
 vercel link && vercel --prod
