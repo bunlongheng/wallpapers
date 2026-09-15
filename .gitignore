@@ -13,3 +13,6 @@ next-env.d.ts
 test-results
 playwright-report
 coverage
+
+# Rendered README preview produced by the audit tooling, not a source asset
+docs/screenshots

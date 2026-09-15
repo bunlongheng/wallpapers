@@ -3,11 +3,11 @@ import Link from "next/link";
 import { CategoryFilter } from "@/components/CategoryFilter";
 import { Wallpaper } from "@/components/Wallpaper";
 import { CATEGORIES } from "@/lib/categories";
-import { WALLPAPERS } from "@/lib/wallpapers";
+import { WALLPAPERS, wallpapersIn } from "@/lib/wallpapers";
 
 const counts: Record<string, number> = {
   all: WALLPAPERS.length,
-  ...Object.fromEntries(CATEGORIES.map((c) => [c.id, WALLPAPERS.filter((w) => w.category === c.id).length])),
+  ...Object.fromEntries(CATEGORIES.map((c) => [c.id, wallpapersIn(c.id).length])),
 };
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -22,7 +22,7 @@ export default function Home() {
             alt=""
             width={40}
             height={40}
-            priority
+            unoptimized
             className="h-10 w-10 rounded-[10px]"
           />
           <p className="tag">Index &middot; {WALLPAPERS.length} plates &middot; zero image assets</p>
@@ -43,14 +43,19 @@ export default function Home() {
         <CategoryFilter counts={counts}>
           <ul className="grid grid-cols-1 gap-x-5 gap-y-9 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {WALLPAPERS.map((w, i) => (
-              <li key={w.id} data-cat={w.category} className="reveal" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
-                <Link href={`/w/${w.id}`} className="plate group" aria-label={`Open ${w.name}`}>
+              <li
+                key={w.id}
+                data-cat={w.category}
+                className={i < 8 ? "reveal" : undefined}
+                style={i < 8 ? { animationDelay: `${i * 35}ms` } : undefined}
+              >
+                <Link href={`/w/${w.id}`} className="plate group">
                   <div className="overflow-hidden">
                     <Wallpaper w={w} className="art aspect-[16/10] w-full" />
                   </div>
                   <div className="flex items-baseline justify-between gap-3 px-3 py-2.5">
                     <span className="truncate text-[0.8rem] tracking-tight text-paper">{w.name}</span>
-                    <span className="plate-no shrink-0 text-[0.625rem] tracking-[0.18em] text-muted transition-colors">
+                    <span className="plate-no tag shrink-0 transition-colors" aria-hidden="true">
                       {pad(i + 1)}
                     </span>
                   </div>
@@ -61,7 +66,7 @@ export default function Home() {
         </CategoryFilter>
       </div>
 
-      <footer className="mt-24 flex flex-col gap-3 border-t border-hair pt-6 text-[0.625rem] tracking-[0.18em] text-muted sm:flex-row sm:items-center sm:justify-between">
+      <footer className="tag mt-24 flex flex-col gap-3 border-t border-hair pt-6 sm:flex-row sm:items-center sm:justify-between">
         <span>Bunlong Heng &middot; MIT</span>
         <a
           className="uppercase transition-colors hover:text-safelight"

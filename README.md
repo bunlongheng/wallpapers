@@ -17,6 +17,7 @@ useful as a backdrop for screenshots, demos and visual regression tests.
 [![Next.js](https://img.shields.io/badge/Next.js-16-000?logo=nextdotjs&logoColor=white)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Tailwind](https://img.shields.io/badge/Tailwind-4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![CI](https://github.com/bunlongheng/wallpapers/actions/workflows/ci.yml/badge.svg)](https://github.com/bunlongheng/wallpapers/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![Runtime deps](https://img.shields.io/badge/runtime%20deps-3-brightgreen)](package.json)
 
@@ -38,7 +39,7 @@ background layers, and optionally one inline-SVG scene.
 | Works offline | after caching | immediately |
 | Licensing | per photo | MIT, all of it |
 
-Measured against the production build:
+Measured against the production build (Next 16.3.5, 2026-09-15):
 
 | | Gzipped |
 |---|---|
@@ -94,7 +95,7 @@ No database, no API keys, no services. It runs offline.
 | Open a plate full-bleed | Click it, or go to `/w/<id>` |
 | Next / previous plate | `→` / `←` |
 | Back to the index | `Esc` |
-| Screenshot a plate clean | Open `/w/<id>` and stop moving the pointer - the chrome fades after 2.6s |
+| Screenshot a plate clean | Open `/w/<id>` and stop moving the pointer - the chrome fades after 5s idle |
 
 Every plate has a stable URL (`/w/solar-drift`, `/w/vanguard`, …) and all 45 pages are
 prerendered at build time, which makes them dependable fixtures for a visual-diff suite.
@@ -154,18 +155,25 @@ components/
   CategoryFilter.tsx  the only client component on the index
   Viewer.tsx          full-bleed view: keyboard nav and self-hiding chrome
 lib/
-  wallpapers.ts       the 40 recipes and the category list
+  wallpapers.ts       the 40 recipes
+  categories.ts       the 4 categories - the client-safe half (see below)
 tests/
   wallpapers.test.ts  catalogue invariants (vitest)
-  e2e/gallery.spec.ts navigation, filtering, 404s, mobile overflow (playwright)
+  render.test.tsx     renders every plate and scene, checks the parallel CSS lists
+  e2e/gallery.spec.ts navigation, filtering, 404s, mobile overflow, axe (playwright)
 ```
 
 ### Why the index ships almost no JavaScript
 
-The 40 recipes never reach the browser. `page.tsx` renders every tile on the server and
-hands them to `CategoryFilter` as `children`; that client component only tracks which
-chip is active and writes it to a `data-filter` attribute. Four CSS rules do the
-filtering. The client bundle carries the filter state, not the catalogue.
+The 40 recipes never reach the browser, and the load-bearing detail is the module split:
+`CategoryFilter` is the only client component that needs category metadata, and it
+imports it from `lib/categories.ts`, never from `lib/wallpapers.ts`. Importing anything
+from the recipes module would pull all forty recipes into the bundle with it.
+
+`page.tsx` then renders every tile on the server and hands them to `CategoryFilter` as
+`children`; that client component only tracks which chip is active and writes it to a
+`data-filter` attribute. One CSS rule, with a selector per category, does the filtering.
+The client bundle carries the filter state, not the catalogue.
 
 ## Scripts
 
@@ -177,7 +185,12 @@ filtering. The client bundle carries the filter state, not the catalogue.
 | `npm run lint` | ESLint (`eslint-config-next`, flat config) |
 | `npm run typecheck` | `tsc --noEmit`, strict + `noUncheckedIndexedAccess` |
 | `npm test` | Vitest - catalogue invariants |
-| `npm run test:e2e` | Playwright - desktop and iPhone projects |
+| `npm run test:watch` | Vitest in watch mode |
+| `npm run test:e2e` | Playwright - desktop and iPhone projects, including axe checks |
+
+`npm install` also installs a husky **pre-push** hook that runs typecheck, lint and the
+unit tests. The e2e suite is not in the hook (it needs a server); CI runs it against the
+production build.
 
 ## Environment variables
 
@@ -185,7 +198,10 @@ There are none to make it run. `.env.example` documents the one optional value:
 
 | Variable | Required | Default | Purpose |
 |---|---|---|---|
-| `NEXT_PUBLIC_SITE_URL` | No | Vercel's URL, else `http://localhost:3050` | Absolute origin for canonical and Open Graph URLs |
+| `NEXT_PUBLIC_SITE_URL` | No | `NEXT_PUBLIC_VERCEL_URL`, else `http://localhost:3050` | Absolute origin for canonical and Open Graph URLs |
+| `NEXT_PUBLIC_VERCEL_URL` | No | set by Vercel | Fallback origin when the above is unset. Used bare, so the code prefixes `https://` |
+| `PORT` | No | `3050` | Port for `npm start` |
+| `CI` | No | unset | Set by CI. Switches Playwright to retries, the GitHub reporter, and the production build |
 
 No secrets exist in this project, so none can leak from it. `.env*` is gitignored except
 `.env.example`.
@@ -214,9 +230,14 @@ Every page is static, so it serves from the edge cache with no server work.
 
 Set in `next.config.ts` and applied to every response:
 
-- **CSP** locked to `'self'` for scripts, styles, fonts, images and connections;
-  `frame-ancestors 'none'`, `object-src 'none'`. `'unsafe-eval'` is added **only** in
-  development, where React's dev build requires it.
+- **CSP**: `default-src`, `font-src` and `connect-src` are `'self'`; `img-src` adds
+  `data:` for the noise tiles; `frame-src`, `worker-src`, `frame-ancestors` and
+  `object-src` are `'none'`. `script-src` and `style-src` are `'self' 'unsafe-inline'` -
+  every page is statically prerendered and Next inlines its own hydration payload, so a
+  nonce would need per-request middleware that a static site does not have. There is no
+  user input on the site. `'unsafe-eval'` is added **only** in the development phase,
+  where React's dev build requires it; a production build never carries it, and an e2e
+  test asserts that.
 - HSTS with preload, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`,
   `Referrer-Policy: strict-origin-when-cross-origin`, and a `Permissions-Policy` that
   denies camera, microphone, geolocation and interest-cohort.
@@ -237,6 +258,12 @@ reveal animation and every transition.
 The Mono category's armoured-helm plates (Vanguard, Sentry Row, Helm Close) are original
 geometry drawn for this project. They are not a likeness of any existing character,
 costume or trademarked design.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) - adding a wallpaper is one object in one array,
+and the three rules it has to satisfy are enforced by `npm test`. Security reports go
+through [SECURITY.md](SECURITY.md).
 
 ## License
 

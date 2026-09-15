@@ -2,8 +2,8 @@ import type { SceneId, SceneOptions } from "@/lib/wallpapers";
 
 /**
  * Scenes are plain SVG geometry - no filters, no images, no randomness at runtime.
- * Everything is deterministic so server and client render byte-identical markup, and
- * a scene stays cheap enough that forty of them can share one page.
+ * Everything is deterministic so a build is reproducible and forty scenes can be
+ * prerendered once, and a scene stays cheap enough that they can share one page.
  */
 
 const W = 1600;
@@ -102,14 +102,14 @@ function Pines({ palette, options }: SceneProps) {
   ];
   return (
     <g transform={squash(options?.scale)}>
-      {rows.map((r, i) => (
-        <path key={r.seed} d={pineRow(r.y, r.h, r.step, r.seed)} fill={at(palette, rows.length - 1 - i)} />
+      {rows.map((row, i) => (
+        <path key={row.seed} d={pineRow(row.y, row.h, row.step, row.seed)} fill={at(palette, rows.length - 1 - i)} />
       ))}
     </g>
   );
 }
 
-/** Smooth wind-cut curves; `crest` adds a lit ridge line on top of each band. */
+/** Smooth wind-cut curves. Callers stroke the same path again for the lit ridge. */
 function duneBand(baseY: number, amp: number, phase: number): string {
   let d = `M0,${r(baseY + Math.sin(phase) * amp)}`;
   for (let x = 0; x <= W; x += 200) {
@@ -153,7 +153,7 @@ function Waves({ palette, options }: SceneProps) {
         <g key={y}>
           <path
             d={`${duneBand(y, 14 + i * 4, i * 1.7)} L${W},${H} L0,${H} Z`}
-            fill={at(palette, Math.min(i, palette.length - 1))}
+            fill={at(palette, rows.length - 1 - i)}
             opacity={0.92}
           />
           <path
@@ -186,8 +186,8 @@ function Canyon({ palette, options }: SceneProps) {
   return (
     <g transform={squash(options?.scale)}>
       {/* Back to front: the innermost, lightest wall first, darker steps over it. */}
-      {[...edges].reverse().map((edge, r) => {
-        const i = edges.length - 1 - r;
+      {[...edges].reverse().map((edge, step) => {
+        const i = edges.length - 1 - step;
         const left = `M0,0 ${edge.map((x, k) => `L${x},${ys[k]}`).join(" ")} L0,${H} Z`;
         const right = `M${W},0 ${edge.map((x, k) => `L${W - x + (k % 2 ? 40 : -30)},${ys[k]}`).join(" ")} L${W},${H} Z`;
         return (
@@ -258,18 +258,22 @@ function Helm({ palette }: { palette: string[] }) {
   );
 }
 
+/** 2.2 puts a single helm at roughly 60% of the frame height. */
+const HELM_UNIT = 2.2;
+/** Above this scale the helm is cropped, so it sits lower to keep the visor centred. */
+const HELM_CROP_SCALE = 1.6;
+
 function Helmet({ palette, options }: SceneProps) {
   const count = options?.count ?? 1;
   const scale = options?.scale ?? 1;
-  // 2.2 puts a single helm at roughly 60% of the frame height.
-  const unit = 2.2 * scale;
+  const unit = HELM_UNIT * scale;
   const spacing = W / (count + 1);
   const centre = (count - 1) / 2;
   return (
     <>
       {Array.from({ length: count }, (_, i) => {
         const x = spacing * (i + 1) - 100 * unit;
-        const y = H / 2 - 125 * unit + (scale > 1.6 ? 150 : 24);
+        const y = H / 2 - 125 * unit + (scale > HELM_CROP_SCALE ? 150 : 24);
         return (
           <g key={i} transform={`translate(${x},${y}) scale(${unit})`} opacity={i === centre ? 1 : 0.7}>
             <Helm palette={palette} />

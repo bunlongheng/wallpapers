@@ -4,7 +4,7 @@ import "./globals.css";
 
 const display = Bodoni_Moda({
   subsets: ["latin"],
-  weight: ["400", "500"],
+  weight: ["500"],
   variable: "--font-display",
   display: "swap",
 });
@@ -14,6 +14,7 @@ const mono = JetBrains_Mono({
   weight: ["400", "500"],
   variable: "--font-mono",
   display: "swap",
+  preload: false,
 });
 
 function siteUrl(): string {
@@ -35,7 +36,12 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     title: "Wallpapers - 40 plates, zero assets",
-    description: "Forty procedural wallpapers across four categories. No image files, ever.",
+    description: "40 procedural wallpapers across 4 categories. No image files, ever.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Wallpapers - 40 plates, zero assets",
+    description: "40 procedural wallpapers across 4 categories. No image files, ever.",
   },
   robots: { index: true, follow: true },
   manifest: "/manifest.webmanifest",

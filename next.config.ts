@@ -21,6 +21,11 @@ const csp = (dev: boolean) =>
     "font-src 'self'",
     "img-src 'self' data:",
     "connect-src 'self'",
+    "manifest-src 'self'",
+    // The site embeds nothing and runs no workers, so close those off explicitly
+    // rather than letting them inherit default-src 'self'.
+    "frame-src 'none'",
+    "worker-src 'none'",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",

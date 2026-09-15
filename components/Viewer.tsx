@@ -32,11 +32,18 @@ export function Viewer({
   const router = useRouter();
   const [hidden, setHidden] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const chrome = useRef<HTMLDivElement>(null);
 
-  /** (Re)arm the idle countdown that hides the chrome. */
+  /**
+   * (Re)arm the idle countdown that hides the chrome. Long enough to read the title on a
+   * first visit, and never fires while a control inside the chrome holds focus.
+   */
   const schedule = useCallback(() => {
     clearTimeout(timer.current);
-    timer.current = setTimeout(() => setHidden(true), 2600);
+    timer.current = setTimeout(() => {
+      if (chrome.current?.contains(document.activeElement)) return;
+      setHidden(true);
+    }, 5000);
   }, []);
 
   const wake = useCallback(() => {
@@ -69,41 +76,71 @@ export function Viewer({
     >
       {children}
 
-      <div className="chrome pointer-events-none absolute inset-0" data-hidden={hidden}>
-        <div className="pointer-events-auto absolute inset-x-0 top-0 flex items-center justify-between gap-4 bg-gradient-to-b from-black/65 to-transparent p-4 sm:p-6">
+      <div
+        ref={chrome}
+        className="chrome pointer-events-none absolute inset-0"
+        data-hidden={hidden}
+        onFocus={wake}
+      >
+        <div
+          className="pointer-events-auto absolute inset-x-0 top-0 flex items-center justify-between gap-4 bg-gradient-to-b from-black/75 to-transparent p-4 sm:p-6"
+          style={{
+            paddingTop: "calc(1rem + env(safe-area-inset-top))",
+            paddingLeft: "max(1rem, env(safe-area-inset-left))",
+            paddingRight: "max(1rem, env(safe-area-inset-right))",
+          }}
+        >
           <Link
             href="/"
-            className="tag rounded-none border border-white/25 px-3 py-2 text-white/80 backdrop-blur-sm transition-colors hover:border-white/70 hover:text-white"
+            className="ctl tag rounded-none border border-white/40 bg-black/40 px-3 py-2 text-white backdrop-blur-sm transition-colors hover:border-white/80"
           >
             &larr; Index
           </Link>
-          <span className="tag text-white/70">
+          <span className="tag rounded-none bg-black/40 px-2 py-1 text-white/90 backdrop-blur-sm">
+            <span className="sr-only">Plate </span>
             {String(index).padStart(2, "0")} / {total}
           </span>
         </div>
 
-        <nav className="pointer-events-auto absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 bg-gradient-to-t from-black/70 to-transparent p-4 sm:p-6">
+        <nav
+          className="pointer-events-auto absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 bg-gradient-to-t from-black/85 via-black/45 to-transparent p-4 sm:p-6"
+          style={{
+            paddingBottom: "calc(1rem + env(safe-area-inset-bottom))",
+            paddingLeft: "max(1rem, env(safe-area-inset-left))",
+            paddingRight: "max(1rem, env(safe-area-inset-right))",
+          }}
+        >
           <div className="min-w-0">
-            <p className="tag text-white/60">{category}</p>
+            <p className="tag text-white/90">{category}</p>
             <h1 className="display truncate text-2xl leading-tight text-white sm:text-4xl">{title}</h1>
-            <p className="mt-1 hidden max-w-md text-xs text-white/70 sm:block">{note}</p>
+            <p className="mt-1 hidden max-w-md text-xs text-white sm:block">{note}</p>
+            <p className="tag mt-2 hidden text-white/90 sm:block">
+              Arrows to browse &middot; Esc for the index
+            </p>
           </div>
           <div className="flex shrink-0 gap-2">
+            {/*
+              The glyph is decorative: axe cannot read an arrow as a label, and WCAG 2.5.3
+              wants the accessible name to match what is visible. The name comes from the
+              screen-reader text instead.
+            */}
             <Link
               href={`/w/${prev.id}`}
               rel="prev"
-              aria-label={`Previous: ${prev.name}`}
-              className="tag border border-white/25 px-4 py-3 text-white/80 backdrop-blur-sm transition-colors hover:border-white/70 hover:text-white"
+              aria-keyshortcuts="ArrowLeft"
+              className="ctl tag border border-white/40 bg-black/40 px-4 py-3 text-white backdrop-blur-sm transition-colors hover:border-white/80"
             >
-              &larr;
+              <span aria-hidden="true">&larr;</span>
+              <span className="sr-only">Previous plate: {prev.name}</span>
             </Link>
             <Link
               href={`/w/${next.id}`}
               rel="next"
-              aria-label={`Next: ${next.name}`}
-              className="tag border border-white/25 px-4 py-3 text-white/80 backdrop-blur-sm transition-colors hover:border-white/70 hover:text-white"
+              aria-keyshortcuts="ArrowRight"
+              className="ctl tag border border-white/40 bg-black/40 px-4 py-3 text-white backdrop-blur-sm transition-colors hover:border-white/80"
             >
-              &rarr;
+              <span aria-hidden="true">&rarr;</span>
+              <span className="sr-only">Next plate: {next.name}</span>
             </Link>
           </div>
         </nav>

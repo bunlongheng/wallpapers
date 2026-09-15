@@ -15,7 +15,9 @@ export default defineConfig({
     { name: "phone", use: { ...devices["iPhone 13"] } },
   ],
   webServer: {
-    command: `npm run dev`,
+    // CI runs the built output so the suite exercises the production CSP (no
+    // 'unsafe-eval') and the prerendered 404, not the dev server's looser setup.
+    command: process.env.CI ? "npm run start" : "npm run dev",
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
