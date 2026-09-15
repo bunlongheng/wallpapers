@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { DemoClock } from "@/components/DemoClock";
 import { Wallpaper } from "@/components/Wallpaper";
 import { CATEGORIES, type CategoryId } from "@/lib/categories";
 import { WALLPAPERS, wallpapersIn } from "@/lib/wallpapers";
@@ -19,7 +20,15 @@ const isCategory = (v: string | null): v is CategoryId => CATEGORIES.some((c) =>
  * Loaded lazily, so the forty recipes only reach the browser in demo mode and a normal
  * visit to the index still ships none of them.
  */
-export default function DemoMode({ theme }: { theme: string | null }) {
+export default function DemoMode({
+  theme,
+  info,
+  unit,
+}: {
+  theme: string | null;
+  info: boolean;
+  unit: "c" | "f";
+}) {
   const plates = isCategory(theme) ? wallpapersIn(theme) : WALLPAPERS;
   const [at, setAt] = useState(0);
 
@@ -39,13 +48,15 @@ export default function DemoMode({ theme }: { theme: string | null }) {
   }, [plates.length]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black" aria-hidden="true">
+    <div className="fixed inset-0 z-50 bg-black">
       {/*
         The wrapper does the stacking, not the Wallpaper. Wallpaper sets `relative` on
         its own root, and a utility cannot be overridden by another utility from the
         class list - so positioning it from here would leave the plates stacked
         vertically instead of on top of each other.
       */}
+      {info && <div className="demo-scrim" aria-hidden="true" />}
+      {info && <DemoClock unit={unit} />}
       {plates.map((w, i) => (
         <div
           key={w.id}

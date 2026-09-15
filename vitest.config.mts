@@ -20,6 +20,7 @@ export default defineConfig({
         "components/CategoryFilter.tsx",
         "components/DemoMode.tsx",
         "components/DemoGate.tsx",
+        "components/DemoClock.tsx",
       ],
       thresholds: { lines: 95, functions: 95, statements: 95, branches: 90 },
     },

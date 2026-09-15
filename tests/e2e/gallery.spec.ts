@@ -142,7 +142,7 @@ test.describe("production headers", () => {
       "style-src 'self' 'unsafe-inline'",
       "font-src 'self'",
       "img-src 'self' data:",
-      "connect-src 'self'",
+      "connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com",
       "manifest-src 'self'",
       "frame-src 'none'",
       "worker-src 'none'",
@@ -223,6 +223,61 @@ test.describe("demo mode", () => {
     await page.goto("/");
     await expect(page.locator(".demo-plate")).toHaveCount(0);
     await expect(page.locator("main")).toBeVisible();
+  });
+});
+
+test.describe("demo mode lock screen", () => {
+  test.use({ timezoneId: "America/Phoenix" });
+
+  /** Stub Open-Meteo so these never depend on the network or on today's weather. */
+  const withWeather = async (page: import("@playwright/test").Page) => {
+    await page.route("**/geocoding-api.open-meteo.com/**", (r) =>
+      r.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({ results: [{ name: "Phoenix", latitude: 33.4, longitude: -112 }] }),
+      }),
+    );
+    await page.route("**/api.open-meteo.com/**", (r) =>
+      r.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({ current: { temperature_2m: 25, weather_code: 0 } }),
+      }),
+    );
+  };
+
+  test("shows city, time and weather", async ({ page }) => {
+    await withWeather(page);
+    await page.goto("/?demo=true&theme=nature");
+
+    await expect(page.locator(".demo-city")).toHaveText("Phoenix");
+    await expect(page.locator(".demo-time")).toHaveText(/^\d{1,2}:\d{2}\s?(AM|PM)?$/i);
+    await expect(page.locator(".demo-date")).not.toBeEmpty();
+    // 25C rendered in the default unit, Fahrenheit.
+    await expect(page.locator(".demo-weather")).toHaveText("77°F · Clear");
+  });
+
+  test("&unit=c switches the temperature", async ({ page }) => {
+    await withWeather(page);
+    await page.goto("/?demo=true&unit=c");
+    await expect(page.locator(".demo-weather")).toHaveText("25°C · Clear");
+  });
+
+  test("the weather is omitted, never invented, when the lookup fails", async ({ page }) => {
+    await page.route("**open-meteo.com/**", (r) => r.abort());
+    await page.goto("/?demo=true&theme=mono");
+
+    // The clock and the timezone-derived city still stand on their own.
+    await expect(page.locator(".demo-time")).toBeVisible();
+    await expect(page.locator(".demo-city")).toHaveText("Phoenix");
+    await expect(page.locator(".demo-weather")).toHaveCount(0);
+  });
+
+  test("&info=0 gives a bare backdrop", async ({ page }) => {
+    await withWeather(page);
+    await page.goto("/?demo=true&info=0");
+    await expect(page.locator(".demo-clock")).toHaveCount(0);
+    await expect(page.locator(".demo-scrim")).toHaveCount(0);
+    await expect(page.locator(".demo-plate")).toHaveCount(TOTAL);
   });
 });
 

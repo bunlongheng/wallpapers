@@ -96,23 +96,65 @@ No database, no API keys, no services. It runs offline.
 | Next / previous plate | `→` / `←` |
 | Back to the index | `Esc` |
 | Screenshot a plate clean | Open `/w/<id>` and stop moving the pointer - the chrome fades after 5s idle |
+| Link a filtered view | `/#leather` - the filter lives in the URL |
+| Use it as a lock-screen backdrop | `/?demo=true` - see [Demo mode](#demo-mode) |
 
 ### Demo mode
 
-Add `?demo=true` to the index and the page becomes a single full-bleed wallpaper that
-changes every 3 seconds. `&theme=<category>` limits it to one category.
+`?demo=true` turns the index into a lock screen: a single full-bleed wallpaper that
+cross-fades to the next plate **every 3 seconds**, with the city, the local time and the
+current weather over it. It is what makes this usable as a backdrop inside something
+else.
 
 ```
 https://wallpapers-bheng.vercel.app/?demo=true
 https://wallpapers-bheng.vercel.app/?demo=true&theme=nature
 ```
 
-That is what makes this usable as a backdrop somewhere else - the
-[Emulator](https://github.com/bunlongheng/emulator) extension frames it behind its
-device shells, which is why `frame-ancestors` is open rather than `'none'`. The demo
-bundle is loaded lazily, so a normal visit to the index never downloads it.
+| Parameter | Values | Default | Effect |
+|---|---|---|---|
+| `demo` | `true`, `1`, or bare `?demo` | off | Turns the backdrop on. `false` and `0` explicitly turn it off |
+| `theme` | `aurora`, `nature`, `leather`, `mono` | all 40 plates | Rotates only that category's ten plates |
+| `info` | `false` or `0` to hide | shown | The city / time / weather overlay |
+| `unit` | `c` or `f` | `f` | Temperature unit |
 
-Every plate has a stable URL (`/w/solar-drift`, `/w/vanguard`, …) and all 45 pages are
+An unrecognised `theme` falls back to the whole catalogue rather than erroring, so a
+typo degrades to something that still works.
+
+**Where the city and weather come from.** The location is read from the browser's own
+IANA timezone (`America/Phoenix` becomes "Phoenix") and geocoded by
+[Open-Meteo](https://open-meteo.com), which needs no key and no `navigator.geolocation`
+prompt - that matters, because this usually runs inside someone else's iframe where a
+permission prompt would be hostile. Nothing personal is sent.
+
+The three degrade independently, and the weather is never invented: the clock always
+renders, the city falls back to the timezone's own name if geocoding fails, and the
+weather line is simply omitted if the forecast call fails. Use `&info=0` for a bare
+wallpaper with no overlay at all.
+
+This is also the one exception to "nothing is fetched": `connect-src` allows the two
+Open-Meteo hosts and nothing else, and no request is made unless `demo` is on.
+
+**Embedding it.** Drop it in an iframe and it behaves as a backdrop with no chrome of
+its own:
+
+```html
+<iframe src="https://wallpapers-bheng.vercel.app/?demo=true&theme=nature"
+        style="border:0;width:100%;height:100%"></iframe>
+```
+
+This is why `frame-ancestors` is open rather than `'none'` - the
+[Emulator](https://github.com/bunlongheng/emulator) extension frames it behind its
+device shells. Framing is safe here because every page is static, read-only,
+unauthenticated, and has no control whose activation does anything.
+
+**What it costs.** Nothing, unless you use it. The demo bundle carries the forty
+recipes, and it is loaded with `next/dynamic` only once `demo` is on, so a normal visit
+to the index still downloads none of them. While demo mode is running the index grid is
+not laid out at all (`display: none`), so an embed renders one wallpaper and nothing
+else.
+
+Every plate has a stable URL (`/w/solar-drift`, `/w/arc-sweep`, …) and all 46 pages are
 prerendered at build time, which makes them dependable fixtures for a visual-diff suite.
 
 <img src="docs/mobile.png" alt="The index on a phone" width="240" align="right">
@@ -173,8 +215,11 @@ app/
 components/
   Wallpaper.tsx       turns one recipe into layered CSS + an optional scene
   Scene.tsx           the 11 inline-SVG scenes (peaks, pines, dunes, canyon, ...)
-  CategoryFilter.tsx  the only client component on the index
+  CategoryFilter.tsx  category chips; the filter state lives in the URL hash
   Viewer.tsx          full-bleed view: keyboard nav and self-hiding chrome
+  DemoGate.tsx        reads ?demo / ?theme / ?info / ?unit, lazy-loads the demo bundle
+  DemoMode.tsx        the rotating backdrop itself
+  DemoClock.tsx       the city / time / weather overlay
 lib/
   wallpapers.ts       the public entry point - the catalogue and its lookups
   categories.ts       the 4 categories - the client-safe half (see below)
@@ -207,7 +252,7 @@ The client bundle carries the filter state, not the catalogue.
 | Script | Does |
 |---|---|
 | `npm run dev` | Dev server on :3050 |
-| `npm run build` | Production build - prerenders all 45 pages |
+| `npm run build` | Production build - prerenders all 46 pages |
 | `npm start` | Serve the production build on :3050 |
 | `npm run lint` | ESLint (`eslint-config-next`, flat config) |
 | `npm run typecheck` | `tsc --noEmit`, strict + `noUncheckedIndexedAccess` |
@@ -257,7 +302,8 @@ Every page is static, so it serves from the edge cache with no server work.
 
 Set in `next.config.ts` and applied to every response:
 
-- **CSP**: `default-src`, `font-src` and `connect-src` are `'self'`; `img-src` adds
+- **CSP**: `default-src` and `font-src` are `'self'`; `connect-src` adds the two
+  Open-Meteo hosts that demo mode's weather lookup uses, and nothing else; `img-src` adds
   `data:` for the noise tiles; `frame-src`, `worker-src` and `object-src` are `'none'`.
   `frame-ancestors` is deliberately open, because the site is meant to be embedded as a
   backdrop by other tools - framing is harmless here, since every page is static,

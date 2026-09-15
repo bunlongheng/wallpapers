@@ -19,7 +19,11 @@ const serverSearch = () => "";
 
 export function DemoGate() {
   const search = useSyncExternalStore(subscribe, readSearch, serverSearch);
-  const demo = new URLSearchParams(search).get("demo");
+  const params = new URLSearchParams(search);
+  const demo = params.get("demo");
   if (demo === null || demo === "false" || demo === "0") return null;
-  return <DemoMode theme={new URLSearchParams(search).get("theme")} />;
+
+  const info = !["false", "0"].includes(params.get("info") ?? "");
+  const unit = params.get("unit") === "c" ? "c" : "f";
+  return <DemoMode theme={params.get("theme")} info={info} unit={unit} />;
 }

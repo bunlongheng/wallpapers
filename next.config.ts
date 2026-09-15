@@ -20,7 +20,10 @@ const csp = (dev: boolean) =>
     "style-src 'self' 'unsafe-inline'",
     "font-src 'self'",
     "img-src 'self' data:",
-    "connect-src 'self'",
+    // Demo mode asks Open-Meteo for the current weather. It is the only network call
+    // the site ever makes, it is opt-in via ?demo, and no key or personal data is sent -
+    // the location comes from the browser's own timezone, not from geolocation.
+    "connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com",
     "manifest-src 'self'",
     // The site embeds nothing and runs no workers, so close those off explicitly
     // rather than letting them inherit default-src 'self'.

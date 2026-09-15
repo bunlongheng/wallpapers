@@ -15,9 +15,14 @@
 
 ### Added
 
-- Demo mode: `?demo=true` is a full-bleed wallpaper that changes every 3 seconds, and
-  `&theme=<category>` scopes it. Built for embedding as a backdrop, which is why
-  `frame-ancestors` is now open.
+- Demo mode: `?demo=true` is a lock screen - a full-bleed wallpaper that changes every
+  3 seconds under the city, the local time and the current weather. `&theme=<category>`
+  scopes it, `&unit=c` switches to Celsius, `&info=0` drops the overlay. Built for
+  embedding as a backdrop, which is why `frame-ancestors` is now open.
+- The weather is the one network call the site makes: Open-Meteo, keyed off the
+  browser's own timezone rather than a geolocation prompt, allowed through `connect-src`
+  and only ever requested when `demo` is on. It degrades to city-and-clock, and then to
+  clock alone, rather than showing anything invented.
 
 ## 1.1.0 - 2026-09-15
 

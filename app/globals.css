@@ -153,6 +153,60 @@ body {
     display: none;
   }
 
+  /*
+    Lock-screen furniture. It floats over whatever plate is showing, including the very
+    light ones, so the text carries its own soft shadow rather than relying on a box.
+  */
+  /*
+    A soft scrim behind the lock-screen text. Invisible over the dark plates, and the
+    only reason the white type still reads over the near-white ones like White Dune.
+  */
+  .demo-scrim {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 62%;
+    /* The plates are rendered after this in the DOM, so it needs to be lifted over them. */
+    z-index: 1;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.62) 0%, rgba(0, 0, 0, 0.3) 45%, transparent 100%);
+    pointer-events: none;
+  }
+
+  .demo-clock {
+    position: absolute;
+    inset-inline: 0;
+    top: clamp(2.5rem, 12vh, 7rem);
+    z-index: 2;
+    display: grid;
+    justify-items: center;
+    gap: 0.25rem;
+    padding-inline: 1.5rem;
+    color: #fff;
+    text-align: center;
+    text-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.75),
+      0 4px 22px rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+  }
+  .demo-city {
+    font-size: clamp(0.75rem, 1.6vw, 0.95rem);
+    letter-spacing: var(--label-tracking);
+    text-transform: uppercase;
+  }
+  .demo-time {
+    font-family: var(--font-display), Georgia, serif;
+    font-weight: 500;
+    font-size: clamp(4rem, 17vw, 12rem);
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+  }
+  .demo-date {
+    font-size: clamp(0.85rem, 2vw, 1.25rem);
+  }
+  .demo-weather {
+    margin-top: 0.6rem;
+    font-size: clamp(0.95rem, 2.2vw, 1.4rem);
+  }
+
   /* Demo mode cross-fades between plates; only the active one is at full opacity. */
   .demo-plate {
     opacity: 0;
