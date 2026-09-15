@@ -1,0 +1,163 @@
+@import "tailwindcss";
+
+/*
+  Darkroom archive: the wallpapers carry every colour, so the chrome around them is
+  near-black, hairline-ruled, and set in a didone / mono pair. One accent only - the
+  red of a darkroom safelight.
+*/
+@theme {
+  --color-ink: #08080a;
+  --color-ink-2: #0e0e11;
+  --color-paper: #f2f0eb;
+  --color-muted: #8a8780;
+  --color-safelight: #ff4a2b;
+  --color-hair: rgba(242, 240, 235, 0.13);
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-mono), ui-monospace, "SFMono-Regular", monospace;
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+  Three noise tiles at three scales, each a ~200-byte inline SVG that the browser
+  rasterises once and reuses for every wallpaper on the page:
+  Each is desaturated, so it varies luminance only and never shifts the hue of the
+  wallpaper underneath it.
+    .grain  - pixel-level film grain
+    .pebble - the raised grain of hide or worked metal
+    .mottle - broad pigment variation across a panel
+*/
+.grain,
+.pebble,
+.mottle {
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+.grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+
+.pebble {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.1' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23p)'/%3E%3C/svg%3E");
+  background-size: 240px 240px;
+}
+
+.mottle {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='800' height='800' filter='url(%23m)'/%3E%3C/svg%3E");
+  background-size: 800px 800px;
+}
+
+.display {
+  font-family: var(--font-display), Georgia, "Times New Roman", serif;
+  font-weight: 500;
+}
+
+.tag {
+  font-size: 0.625rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+/*
+  Category filtering is pure CSS - the recipes never have to reach the client. One
+  negation rule per category, so there is no second rule to lose a specificity fight
+  with. `data-filter="all"` matches none of them and everything stays visible.
+*/
+[data-filter="aurora"] [data-cat]:not([data-cat="aurora"]),
+[data-filter="nature"] [data-cat]:not([data-cat="nature"]),
+[data-filter="leather"] [data-cat]:not([data-cat="leather"]),
+[data-filter="mono"] [data-cat]:not([data-cat="mono"]) {
+  display: none;
+}
+
+.plate {
+  display: block;
+  border: 1px solid var(--color-hair);
+  background: var(--color-ink-2);
+  transition: border-color 0.25s ease, transform 0.25s ease;
+}
+.plate:hover,
+.plate:focus-visible {
+  border-color: color-mix(in srgb, var(--color-safelight) 70%, transparent);
+  transform: translateY(-2px);
+}
+.plate:focus-visible {
+  outline: 2px solid var(--color-safelight);
+  outline-offset: 3px;
+}
+.plate .art {
+  transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.plate:hover .art {
+  transform: scale(1.04);
+}
+.plate:hover .plate-no {
+  color: var(--color-safelight);
+}
+
+.reveal {
+  animation: reveal 0.7s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+.chip {
+  border: 1px solid var(--color-hair);
+  padding: 0.5rem 0.9rem;
+  font-size: 0.625rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+  cursor: pointer;
+}
+.chip:hover {
+  color: var(--color-paper);
+  border-color: color-mix(in srgb, var(--color-paper) 40%, transparent);
+}
+.chip[aria-pressed="true"] {
+  color: var(--color-ink);
+  background: var(--color-paper);
+  border-color: var(--color-paper);
+}
+.chip:focus-visible {
+  outline: 2px solid var(--color-safelight);
+  outline-offset: 2px;
+}
+
+/* Viewer chrome fades out so a screenshot can be taken of the wallpaper alone. */
+.chrome {
+  transition: opacity 0.4s ease;
+}
+.chrome[data-hidden="true"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
