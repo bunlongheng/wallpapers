@@ -1,6 +1,6 @@
 {
   "name": "wallpapers",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "description": "A zero-asset wallpaper gallery - 40 procedural wallpapers drawn with CSS gradients and inline SVG, across 4 categories.",
   "license": "MIT",

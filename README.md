@@ -57,21 +57,21 @@ The catalogue itself never reaches the browser; see
 |---|---|---|
 | **Aurora** | Radiant gradient meshes and light bloom | Solar Drift, Neon Tide, Magma Dusk |
 | **Nature** | Ridgelines, tree cover, dunes and tide | Alpine Dawn, Canyon Cut, Lake Mirror |
-| **Leather** | Grain, weave, metal and worked hide | Saddle Tan, Black Carbon, Forged Iron |
-| **Mono** | High-contrast black and white cinema | Vanguard, Corridor, Halftone Moon |
+| **Leather** | Grain, weave, metal and worked hide | Saddle Tan, Pitch Hide, Forged Iron |
+| **Mono** | High-contrast black and white | Gradation, Corridor, Halftone Moon |
 
 <table>
 <tr>
 <td width="25%"><img src="docs/aurora.png" alt="Solar Drift - amber and rose gradient bloom"></td>
 <td width="25%"><img src="docs/nature.png" alt="Alpine Dawn - a cold ridgeline at first light"></td>
 <td width="25%"><img src="docs/leather.png" alt="Saddle Tan - full-grain hide"></td>
-<td width="25%"><img src="docs/mono.png" alt="Vanguard - an armoured helm in black and white"></td>
+<td width="25%"><img src="docs/mono.png" alt="Arc Sweep - a monochrome conic gradient"></td>
 </tr>
 <tr>
 <td align="center"><sub><b>Aurora</b> / Solar Drift</sub></td>
 <td align="center"><sub><b>Nature</b> / Alpine Dawn</sub></td>
 <td align="center"><sub><b>Leather</b> / Saddle Tan</sub></td>
-<td align="center"><sub><b>Mono</b> / Vanguard</sub></td>
+<td align="center"><sub><b>Mono</b> / Arc Sweep</sub></td>
 </tr>
 </table>
 
@@ -172,7 +172,7 @@ app/
   globals.css         design tokens, the three noise tiles, the CSS category filter
 components/
   Wallpaper.tsx       turns one recipe into layered CSS + an optional scene
-  Scene.tsx           the 12 inline-SVG scenes (peaks, pines, dunes, helmet, ...)
+  Scene.tsx           the 11 inline-SVG scenes (peaks, pines, dunes, canyon, ...)
   CategoryFilter.tsx  the only client component on the index
   Viewer.tsx          full-bleed view: keyboard nav and self-hiding chrome
 lib/
@@ -281,12 +281,6 @@ Scenes are `aria-hidden` decoration. Category chips are real buttons carrying
 `aria-pressed`. Every tile link has an accessible name, viewer arrows announce their
 destination plate, focus is always visible, and `prefers-reduced-motion` disables the
 reveal animation and every transition.
-
-## Notes
-
-The Mono category's armoured-helm plates (Vanguard, Sentry Row, Helm Close) are original
-geometry drawn for this project. They are not a likeness of any existing character,
-costume or trademarked design.
 
 ## Changelog
 

@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.2.0 - 2026-09-15
+
+### Changed
+
+- Replaced four plates that did not hold up. The three armoured-helm plates read as flat
+  cartoons next to the rest of Mono, and Cognac Stitch's saddle stitch looked like road
+  markings floating on the hide. In their place: **Gradation**, **Split Field** and
+  **Arc Sweep** - graphic-design pieces built purely from gradient hard-stops - and
+  **Pitch Hide**, a black grained leather.
+- The `helmet` scene and its `count` option are gone with them, so the registry is down
+  to 11 scenes and every one is still used by a recipe.
+- The landing page moved to a light ground and lost its intro copy.
+
+### Added
+
+- Demo mode: `?demo=true` is a full-bleed wallpaper that changes every 3 seconds, and
+  `&theme=<category>` scopes it. Built for embedding as a backdrop, which is why
+  `frame-ancestors` is now open.
+
 ## 1.1.0 - 2026-09-15
 
 Audit pass across ten lenses, then a verification pass on the fixes.

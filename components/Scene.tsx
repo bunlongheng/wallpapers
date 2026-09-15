@@ -217,78 +217,6 @@ function Ridges({ palette, options }: SceneProps) {
   );
 }
 
-/**
- * A stylised sci-fi helm - original geometry, drawn in a 200x250 local box and then
- * placed by the caller. Not a likeness of any existing character or costume.
- */
-function Helm({ palette }: { palette: string[] }) {
-  const shell = at(palette, 0);
-  const shade = at(palette, 1);
-  const dark = at(palette, 2);
-  const outline =
-    "M100,2 C144,2 170,30 178,78 L186,132 C190,168 182,196 164,214 L138,242 L62,242 L36,214 C18,196 10,168 14,132 L22,78 C30,30 56,2 100,2 Z";
-  return (
-    <g>
-      <path d={outline} fill={shell} />
-      {/* The unlit side of the shell. */}
-      <path
-        d="M100,2 C144,2 170,30 178,78 L186,132 C190,168 182,196 164,214 L138,242 L116,242 L142,212 C158,194 166,168 162,132 L154,80 C146,34 128,8 100,2 Z"
-        fill={shade}
-      />
-      {/* Brow band, dipping at the bridge. */}
-      <path
-        d="M15,88 C54,70 146,70 185,88 L179,118 C150,104 128,112 100,112 C72,112 50,104 21,118 Z"
-        fill={dark}
-      />
-      {/* Visor lenses, angled in toward the bridge. */}
-      <path d="M25,124 L85,115 L91,153 L43,166 Z" fill={dark} />
-      <path d="M175,124 L115,115 L109,153 L157,166 Z" fill={dark} />
-      {/* Bridge ridge down to the breather. */}
-      <path d="M93,112 L107,112 L105,176 L95,176 Z" fill={shade} />
-      {/* Breather box with vent slits. */}
-      <path d="M74,176 L126,176 L120,211 L80,211 Z" fill={dark} />
-      {[0, 1, 2].map((i) => (
-        <rect key={i} x={84} y={183 + i * 9} width={32 - i * 3} height={3} fill={shade} opacity={0.8} />
-      ))}
-      {/* Jaw teeth. */}
-      {[0, 1, 2, 3, 4].map((i) => (
-        <rect key={i} x={65 + i * 15} y={215} width={9} height={15} rx={2} fill={dark} />
-      ))}
-    </g>
-  );
-}
-
-/** 2.2 puts a single helm at roughly 60% of the frame height. */
-const HELM_UNIT = 2.2;
-/** Above this scale the helm is cropped, so it sits lower to keep the visor centred. */
-const HELM_CROP_SCALE = 1.6;
-
-function Helmet({ palette, options }: SceneProps) {
-  const count = options?.count ?? 1;
-  const scale = options?.scale ?? 1;
-  const unit = HELM_UNIT * scale;
-  const spacing = W / (count + 1);
-  const centre = (count - 1) / 2;
-  return (
-    <>
-      {Array.from({ length: count }, (_, i) => {
-        const x = spacing * (i + 1) - 100 * unit;
-        const y = H / 2 - 125 * unit + (scale > HELM_CROP_SCALE ? 150 : 24);
-        return (
-          <g key={i} transform={`translate(${x},${y}) scale(${unit})`} opacity={i === centre ? 1 : 0.7}>
-            <Helm palette={palette} />
-          </g>
-        );
-      })}
-    </>
-  );
-}
-
-/**
- * One-point perspective. Each bay is four trapezoid panels - ceiling, floor and two
- * walls - between one rectangle and the next one in, which reads as depth in a way
- * that nested outlines never do.
- */
 function Corridor({ palette }: SceneProps) {
   const light = at(palette, 0);
   const mid = at(palette, 1);
@@ -409,7 +337,6 @@ const SCENES: Record<SceneId, (props: SceneProps) => React.ReactElement> = {
   dunes: Dunes,
   waves: Waves,
   canyon: Canyon,
-  helmet: Helmet,
   corridor: Corridor,
   slats: Slats,
   halftone: Halftone,

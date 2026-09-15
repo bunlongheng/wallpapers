@@ -12,7 +12,6 @@ export type SceneId =
   | "dunes"
   | "waves"
   | "canyon"
-  | "helmet"
   | "corridor"
   | "slats"
   | "halftone"
@@ -55,17 +54,11 @@ type SceneFields =
       /** `mirror` reflects the range across the waterline. */
       sceneOptions?: Scaled & { mirror?: boolean };
     }
-  | {
-      scene: "helmet";
-      palette: string[];
-      /** `count` repeats the motif across the frame. */
-      sceneOptions?: Scaled & { count?: number };
-    }
   | { scene: GroundScene; palette: string[]; sceneOptions?: Scaled }
   | { scene: FlatScene; palette: string[]; sceneOptions?: never };
 
 /** The options any scene might accept, for the renderer's single entry point. */
-export type SceneOptions = Scaled & { mirror?: boolean; count?: number };
+export type SceneOptions = Scaled & { mirror?: boolean };
 
 type BaseRecipe = {
   id: string;

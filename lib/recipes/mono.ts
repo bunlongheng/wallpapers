@@ -1,53 +1,53 @@
 /**
- * High-contrast black and white. The armoured helm is original geometry, not a
- * likeness of any existing character, costume or trademarked design.
+ * High-contrast black and white - part cinema, part poster. The first three are
+ * graphic-design pieces built purely from gradient hard-stops: a form, a split and
+ * a sweep.
  */
 
 import { blob, vignette, type Recipe } from "./types";
 
 export const MONO: Recipe[] = [
   {
-    id: "vanguard",
-    name: "Vanguard",
+    id: "gradation",
+    name: "Gradation",
     category: "mono",
-    note: "A single armoured helm lit from one side.",
-    base: "#050505",
-    scene: "helmet",
-    palette: ["#f4f4f4", "#b8b8b8", "#1a1a1a"],
-    grain: 0.08,
+    note: "A tonal scale, posterised into hard steps.",
+    base: "#0b0b0b",
+    grain: 0.07,
     layers: [
-      { image: "radial-gradient(70% 60% at 50% 42%, rgba(255,255,255,0.14), transparent 70%)" },
-      { image: "linear-gradient(0deg, #000 0%, #0b0b0b 60%, #141414 100%)" },
+      { image: "radial-gradient(62% 52% at 28% 30%, rgba(255,255,255,0.16), transparent 72%)" },
+      {
+        image:
+          "linear-gradient(100deg, #f7f7f7 0 12%, #cfcfcf 12% 26%, #a2a2a2 26% 40%, #767676 40% 55%, #4c4c4c 55% 70%, #292929 70% 85%, #0b0b0b 85% 100%)",
+      },
     ],
   },
   {
-    id: "sentry-row",
-    name: "Sentry Row",
+    id: "split-field",
+    name: "Split Field",
     category: "mono",
-    note: "Three helms in formation, identical.",
-    base: "#060606",
-    scene: "helmet",
-    sceneOptions: { count: 3, scale: 0.52 },
-    palette: ["#ededed", "#9a9a9a", "#141414"],
-    grain: 0.08,
+    note: "A hard diagonal cut, with a gradient running either side of it.",
+    base: "#0a0a0a",
+    grain: 0.06,
     layers: [
-      { image: "radial-gradient(90% 70% at 50% 46%, rgba(255,255,255,0.11), transparent 72%)" },
-      { image: "linear-gradient(0deg, #000 0%, #0a0a0a 70%, #111 100%)" },
+      { image: "linear-gradient(118deg, transparent 0 49.7%, #ffffff 49.7% 50.1%, transparent 50.1%)" },
+      { image: "linear-gradient(118deg, #f7f7f7 0%, #8e8e8e 49.9%, #0e0e0e 50%, #3c3c3c 100%)" },
     ],
   },
   {
-    id: "helm-close",
-    name: "Helm Close",
+    id: "arc-sweep",
+    name: "Arc Sweep",
     category: "mono",
-    note: "Cropped hard - the visor fills the frame.",
-    base: "#040404",
-    scene: "helmet",
-    sceneOptions: { scale: 2.1 },
-    palette: ["#fafafa", "#8e8e8e", "#0d0d0d"],
-    grain: 0.09,
+    note: "A single conic sweep from white through black and back.",
+    base: "#080808",
+    grain: 0.07,
     layers: [
-      { image: "radial-gradient(60% 55% at 38% 40%, rgba(255,255,255,0.18), transparent 68%)" },
-      { image: "linear-gradient(115deg, #161616 0%, #000 58%)" },
+      { image: "radial-gradient(38% 34% at 50% 52%, rgba(255,255,255,0.35), transparent 70%)" },
+      {
+        image:
+          "conic-gradient(from 204deg at 50% 52%, #f6f6f6, #141414 30%, #dcdcdc 56%, #0a0a0a 82%, #f6f6f6)",
+      },
+      vignette("rgba(0,0,0,0.82)", "34%", "128% 108%"),
     ],
   },
   {

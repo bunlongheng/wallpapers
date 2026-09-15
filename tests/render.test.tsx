@@ -83,7 +83,6 @@ describe("Scenes", () => {
     "dunes",
     "waves",
     "canyon",
-    "helmet",
     "corridor",
     "slats",
     "halftone",

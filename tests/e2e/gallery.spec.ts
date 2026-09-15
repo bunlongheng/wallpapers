@@ -6,6 +6,8 @@ import { WALLPAPERS, wallpapersIn } from "../../lib/wallpapers";
 // Specs run in Node, so the catalogue is the source of truth for every count here.
 const TOTAL = WALLPAPERS.length;
 const IDS = CATEGORIES.map((c) => c.id);
+/** Derived, not hardcoded - a plate id in a spec goes stale the moment one is replaced. */
+const A_PLATE = wallpapersIn("mono")[0]!.id;
 
 /**
  * Keyboard navigation is attached on hydration, so a key pressed before the bundle has
@@ -74,7 +76,7 @@ test("a plate opens full-bleed and walks forward with the keyboard", async ({ pa
 });
 
 test("Escape returns to the index", async ({ page }) => {
-  await openPlate(page, "vanguard");
+  await openPlate(page, A_PLATE);
   await page.keyboard.press("Escape");
   await expect(page).toHaveURL(/\/$/);
 });
