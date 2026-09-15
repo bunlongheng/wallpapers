@@ -6,6 +6,10 @@
 
 **40 wallpapers. 4 categories. Zero image files.**
 
+**[Open the gallery →](https://wallpapers-roan.vercel.app)**
+
+<img src="docs/gallery.png" alt="The wallpapers index - a contact sheet of 40 plates" width="820">
+
 Every plate is drawn at render time from CSS gradients and inline SVG, so the whole
 gallery downloads no images, stays sharp at any resolution, and loads fast enough to be
 useful as a backdrop for screenshots, demos and visual regression tests.
@@ -55,6 +59,21 @@ The catalogue itself never reaches the browser; see
 | **Leather** | Grain, weave, metal and worked hide | Saddle Tan, Black Carbon, Forged Iron |
 | **Mono** | High-contrast black and white cinema | Vanguard, Corridor, Halftone Moon |
 
+<table>
+<tr>
+<td width="25%"><img src="docs/aurora.png" alt="Solar Drift - amber and rose gradient bloom"></td>
+<td width="25%"><img src="docs/nature.png" alt="Alpine Dawn - a cold ridgeline at first light"></td>
+<td width="25%"><img src="docs/leather.png" alt="Saddle Tan - full-grain hide"></td>
+<td width="25%"><img src="docs/mono.png" alt="Vanguard - an armoured helm in black and white"></td>
+</tr>
+<tr>
+<td align="center"><sub><b>Aurora</b> / Solar Drift</sub></td>
+<td align="center"><sub><b>Nature</b> / Alpine Dawn</sub></td>
+<td align="center"><sub><b>Leather</b> / Saddle Tan</sub></td>
+<td align="center"><sub><b>Mono</b> / Vanguard</sub></td>
+</tr>
+</table>
+
 ## Quick start
 
 ```bash
@@ -77,8 +96,17 @@ No database, no API keys, no services. It runs offline.
 | Back to the index | `Esc` |
 | Screenshot a plate clean | Open `/w/<id>` and stop moving the pointer - the chrome fades after 2.6s |
 
-Every plate has a stable URL (`/w/solar-drift`, `/w/vanguard`, …) and all 43 pages are
+Every plate has a stable URL (`/w/solar-drift`, `/w/vanguard`, …) and all 45 pages are
 prerendered at build time, which makes them dependable fixtures for a visual-diff suite.
+
+<img src="docs/mobile.png" alt="The index on a phone" width="240" align="right">
+
+The layout is a single fluid grid: one column on a phone, two on a tablet, three on a
+laptop and four on a wide desktop, with the hero type scaling on `clamp()`. The viewer
+uses `100dvh` so mobile browser chrome never clips it, and an e2e test asserts the page
+never scrolls sideways at 390px.
+
+<br clear="right">
 
 ## How a wallpaper is defined
 
@@ -144,7 +172,7 @@ filtering. The client bundle carries the filter state, not the catalogue.
 | Script | Does |
 |---|---|
 | `npm run dev` | Dev server on :3050 |
-| `npm run build` | Production build - prerenders all 43 pages |
+| `npm run build` | Production build - prerenders all 45 pages |
 | `npm start` | Serve the production build on :3050 |
 | `npm run lint` | ESLint (`eslint-config-next`, flat config) |
 | `npm run typecheck` | `tsc --noEmit`, strict + `noUncheckedIndexedAccess` |
@@ -173,6 +201,8 @@ Vercel picks up `vercel.json` as-is:
 | Build | `npm run build` |
 | Output | `.next` |
 | Env vars | none required |
+
+Live at **[https://wallpapers-roan.vercel.app](https://wallpapers-roan.vercel.app)**.
 
 ```bash
 vercel link && vercel --prod
