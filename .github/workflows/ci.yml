@@ -38,7 +38,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      - run: npx playwright install --with-deps chromium
+      # The two projects are Desktop Chrome and iPhone 13, and iPhone 13 is WebKit.
+      - run: npx playwright install --with-deps chromium webkit
       # CI runs the suite against `next start`, so the production CSP (no
       # 'unsafe-eval') and the prerendered 404 are what actually get tested.
       - run: npm run test:e2e
