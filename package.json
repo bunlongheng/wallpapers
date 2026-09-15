@@ -28,7 +28,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "prepare": "husky || true"
+    "prepare": "husky || true",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "next": "16.3.5",
@@ -42,7 +43,8 @@
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
+    "@vitest/coverage-v8": "^5.0.1",
+    "eslint": "^9.39.5",
     "eslint-config-next": "16.3.5",
     "husky": "^9.1.7",
     "tailwindcss": "^4",
@@ -50,12 +52,6 @@
     "vitest": "^5.0.1"
   },
   "engines": {
-    "node": ">=20.9"
-  },
-  "browserslist": [
-    "chrome >= 111",
-    "safari >= 16.4",
-    "firefox >= 128",
-    "edge >= 111"
-  ]
+    "node": ">=22"
+  }
 }

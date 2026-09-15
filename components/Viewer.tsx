@@ -82,39 +82,25 @@ export function Viewer({
         data-hidden={hidden}
         onFocus={wake}
       >
-        <div
-          className="pointer-events-auto absolute inset-x-0 top-0 flex items-center justify-between gap-4 bg-gradient-to-b from-black/75 to-transparent p-4 sm:p-6"
-          style={{
-            paddingTop: "calc(1rem + env(safe-area-inset-top))",
-            paddingLeft: "max(1rem, env(safe-area-inset-left))",
-            paddingRight: "max(1rem, env(safe-area-inset-right))",
-          }}
-        >
+        <div className="bar bar-top pointer-events-auto absolute inset-x-0 top-0 flex items-center justify-between gap-4 bg-gradient-to-b from-black/75 to-transparent">
           <Link
             href="/"
             className="ctl tag rounded-none border border-white/40 bg-black/40 px-3 py-2 text-white backdrop-blur-sm transition-colors hover:border-white/80"
           >
             &larr; Index
           </Link>
-          <span className="tag rounded-none bg-black/40 px-2 py-1 text-white/90 backdrop-blur-sm">
+          <span className="tag rounded-none bg-black/40 px-2 py-1 text-white backdrop-blur-sm">
             <span className="sr-only">Plate </span>
             {String(index).padStart(2, "0")} / {total}
           </span>
         </div>
 
-        <nav
-          className="pointer-events-auto absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 bg-gradient-to-t from-black/85 via-black/45 to-transparent p-4 sm:p-6"
-          style={{
-            paddingBottom: "calc(1rem + env(safe-area-inset-bottom))",
-            paddingLeft: "max(1rem, env(safe-area-inset-left))",
-            paddingRight: "max(1rem, env(safe-area-inset-right))",
-          }}
-        >
+        <nav className="bar bar-bottom pointer-events-auto absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 bg-gradient-to-t from-black/85 via-black/45 to-transparent">
           <div className="min-w-0">
-            <p className="tag text-white/90">{category}</p>
+            <p className="tag text-white">{category}</p>
             <h1 className="display truncate text-2xl leading-tight text-white sm:text-4xl">{title}</h1>
             <p className="mt-1 hidden max-w-md text-xs text-white sm:block">{note}</p>
-            <p className="tag mt-2 hidden text-white/90 sm:block">
+            <p className="tag mt-2 hidden text-white sm:block">
               Arrows to browse &middot; Esc for the index
             </p>
           </div>

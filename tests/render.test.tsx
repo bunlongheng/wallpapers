@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { Scene } from "@/components/Scene";
 import { Wallpaper } from "@/components/Wallpaper";
-import { WALLPAPERS, type SceneId } from "@/lib/wallpapers";
+import { WALLPAPERS, type Recipe, type SceneId } from "@/lib/wallpapers";
 
 /** Split a CSS value list on its top-level commas, ignoring the ones inside gradients. */
 function topLevelParts(value: string): string[] {
@@ -113,19 +113,30 @@ describe("Scenes", () => {
     expect([...SCENE_IDS].filter((id) => !used.has(id))).toEqual([]);
   });
 
-  // `mirror` is only honoured by peaks and `count` only by helmet, so setting either on
-  // another scene is a silent no-op. Catch that here rather than in a screenshot.
-  it("has no recipe setting a scene option its scene ignores", () => {
-    for (const w of WALLPAPERS) {
-      if (!w.sceneOptions) continue;
-      if (w.sceneOptions.mirror !== undefined) expect(w.scene, w.id).toBe("peaks");
-      if (w.sceneOptions.count !== undefined) expect(w.scene, w.id).toBe("helmet");
-      if (w.sceneOptions.scale !== undefined) {
-        expect(["peaks", "ridges", "pines", "dunes", "waves", "canyon", "helmet"], w.id).toContain(
-          w.scene,
-        );
-      }
-    }
+  // Which scene reads which option is now a compile-time guarantee (the SceneFields
+  // union in lib/wallpapers.ts), so these are type assertions rather than runtime ones.
+  it("rejects a scene option the scene ignores, at compile time", () => {
+    // @ts-expect-error - `ring` is a flat scene and accepts no options at all
+    const badOption: Recipe = { ...WALLPAPERS[0]!, scene: "ring", palette: ["#fff"], sceneOptions: { scale: 2 } };
+    // @ts-expect-error - `mirror` belongs to peaks, not pines
+    const badMirror: Recipe = { ...WALLPAPERS[0]!, scene: "pines", palette: ["#fff"], sceneOptions: { mirror: true } };
+    // @ts-expect-error - a scene cannot be declared without the palette it paints with
+    const noPalette: Recipe = { ...WALLPAPERS[0]!, scene: "peaks" };
+    expect([badOption, badMirror, noPalette]).toHaveLength(3);
+  });
+
+});
+
+describe("untrusted-looking text", () => {
+  // Recipe text is author-controlled today, but this pins the guarantee that it is
+  // escaped rather than interpolated, so a future data source cannot inject markup.
+  it("is escaped, never interpolated as markup", () => {
+    const hostile = '<img src=x onerror=alert(1)> & "quoted"';
+    const markup = renderToStaticMarkup(
+      <Wallpaper w={{ ...WALLPAPERS[0]!, name: hostile, note: hostile }} />,
+    );
+    expect(markup).not.toContain("<img");
+    expect(markup).not.toContain("onerror");
   });
 });
 

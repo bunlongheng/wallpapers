@@ -120,21 +120,27 @@ One entry in `lib/wallpapers.ts` is the whole thing:
   category: "nature",
   note: "First light on a cold ridgeline.",
   base: "#1b1220",
-  scene: "peaks",                                   // optional inline-SVG scene
+  scene: "peaks",                                         // optional inline-SVG scene
   palette: ["#0a0710", "#1b1428", "#2e2440", "#4a3a5c"],  // front-most colour first
-  grain: 0.05,                                      // film-grain opacity
+  grain: 0.05,                                            // film-grain opacity
   layers: [
-    { image: "linear-gradient(180deg, #2a1a36 0%, #d0714f 72%, #f2ac6b 100%)" },
+    { image: "linear-gradient(180deg, #2a1a36 0%, #6b3350 42%, #d0714f 72%, #f2ac6b 100%)" },
+    blob("rgba(255,214,150,0.55)", "50%", "78%", "44% 30%"),   // the low sun
   ],
 }
 ```
 
-Three rules keep it honest, and the unit tests enforce all three:
+`blob()` and `vignette()` are the two layer helpers in `lib/recipes/types.ts`; anything
+else is a plain CSS gradient string.
+
+Three rules keep it honest:
 
 1. **One gradient per layer.** `Wallpaper.tsx` builds `background-image`, `-size`,
    `-position` and `-repeat` as parallel comma lists; two gradients in one layer would
-   silently misalign every list after it.
-2. **A scene needs a palette.** Scenes paint from `palette`, front-most entry first.
+   silently misalign every list after it. Tested at render level, for all 40 plates.
+2. **A scene needs a palette, and only takes options its scene reads.** This one the
+   *compiler* enforces: `scene`, `palette` and `sceneOptions` are a discriminated union,
+   so `scene: "ring"` with a `scale` option, or a scene with no palette, will not build.
 3. **Texture opacities live in 0..1.** `grain`, `pebble` and `mottle` are the three
    shared noise tiles - one inline SVG each, rasterised once and reused by all 40 plates.
 
@@ -155,8 +161,14 @@ components/
   CategoryFilter.tsx  the only client component on the index
   Viewer.tsx          full-bleed view: keyboard nav and self-hiding chrome
 lib/
-  wallpapers.ts       the 40 recipes
+  wallpapers.ts       the public entry point - the catalogue and its lookups
   categories.ts       the 4 categories - the client-safe half (see below)
+  recipes/
+    types.ts          the Recipe model plus the blob() and vignette() layer helpers
+    aurora.ts         10 recipes per category, one file each
+    nature.ts
+    leather.ts
+    mono.ts
 tests/
   wallpapers.test.ts  catalogue invariants (vitest)
   render.test.tsx     renders every plate and scene, checks the parallel CSS lists
@@ -194,7 +206,7 @@ production build.
 
 ## Environment variables
 
-There are none to make it run. `.env.example` documents the one optional value:
+Nothing is required to run it. These are every value the project reads:
 
 | Variable | Required | Default | Purpose |
 |---|---|---|---|

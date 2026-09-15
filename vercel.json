@@ -4,7 +4,7 @@
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
   "installCommand": "npm ci",
-  "outputDirectory": ".next",
-  "regions": ["iad1"],
-  "github": { "silent": true }
+  "github": {
+    "silent": true
+  }
 }

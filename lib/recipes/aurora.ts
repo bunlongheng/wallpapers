@@ -1,0 +1,151 @@
+/**
+ * Radiant gradient meshes. No scenes here - every plate is pure CSS light.
+ */
+
+import { blob, vignette, type Recipe } from "./types";
+
+export const AURORA: Recipe[] = [
+  {
+    id: "solar-drift",
+    name: "Solar Drift",
+    category: "aurora",
+    note: "Low amber sun bleeding into rose and deep umber.",
+    base: "#140b06",
+    grain: 0.05,
+    layers: [
+      blob("rgba(255,168,58,0.70)", "18%", "78%", "70% 60%"),
+      blob("rgba(255,86,74,0.52)", "72%", "22%", "62% 58%"),
+      blob("rgba(255,214,150,0.32)", "46%", "52%", "48% 44%"),
+      { image: "linear-gradient(200deg, rgba(18,8,4,0.85), rgba(60,20,8,0.15) 55%, rgba(12,5,2,0.9))" },
+    ],
+  },
+  {
+    id: "cobalt-bloom",
+    name: "Cobalt Bloom",
+    category: "aurora",
+    note: "Electric cobalt opening into cyan at the edges.",
+    base: "#030a1c",
+    grain: 0.05,
+    layers: [
+      blob("rgba(56,130,255,0.72)", "25%", "28%", "66% 62%"),
+      blob("rgba(34,224,235,0.45)", "80%", "70%", "58% 54%"),
+      blob("rgba(126,86,255,0.38)", "55%", "88%", "70% 50%"),
+      { image: "linear-gradient(160deg, rgba(2,6,18,0.7), transparent 45%, rgba(1,4,14,0.92))" },
+    ],
+  },
+  {
+    id: "ember-fold",
+    name: "Ember Fold",
+    category: "aurora",
+    note: "Folded heat - crimson creases over near-black.",
+    base: "#0c0503",
+    grain: 0.06,
+    layers: [
+      { image: "conic-gradient(from 210deg at 40% 60%, rgba(255,72,38,0.55), rgba(120,12,8,0.1) 35%, rgba(255,140,52,0.45) 62%, rgba(90,8,6,0.1) 88%, rgba(255,72,38,0.55))" },
+      blob("rgba(255,108,36,0.55)", "38%", "58%", "52% 48%"),
+      blob("rgba(255,40,30,0.30)", "84%", "18%", "46% 46%"),
+      vignette("rgba(6,2,1,0.92)", "30%", "120% 100%"),
+    ],
+  },
+  {
+    id: "vapor-trail",
+    name: "Vapor Trail",
+    category: "aurora",
+    note: "Mint and lavender drifting across cold slate.",
+    base: "#0a1216",
+    grain: 0.05,
+    layers: [
+      blob("rgba(126,240,206,0.52)", "22%", "36%", "64% 56%"),
+      blob("rgba(178,158,255,0.46)", "76%", "62%", "62% 58%"),
+      blob("rgba(238,250,246,0.16)", "50%", "18%", "54% 34%"),
+      { image: "linear-gradient(190deg, rgba(8,16,20,0.6), transparent 50%, rgba(4,10,14,0.9))" },
+    ],
+  },
+  {
+    id: "neon-tide",
+    name: "Neon Tide",
+    category: "aurora",
+    note: "Magenta breaking over a cyan undertow.",
+    base: "#0a0320",
+    grain: 0.06,
+    layers: [
+      blob("rgba(255,54,160,0.62)", "72%", "30%", "62% 58%"),
+      blob("rgba(20,220,255,0.52)", "24%", "72%", "66% 58%"),
+      blob("rgba(120,60,255,0.40)", "50%", "48%", "56% 50%"),
+      { image: "linear-gradient(0deg, rgba(4,1,14,0.88), transparent 60%)" },
+    ],
+  },
+  {
+    id: "iris-veil",
+    name: "Iris Veil",
+    category: "aurora",
+    note: "Soft violet veils layered over plum.",
+    base: "#150a1e",
+    grain: 0.04,
+    layers: [
+      blob("rgba(186,140,255,0.55)", "32%", "26%", "66% 58%"),
+      blob("rgba(255,150,206,0.42)", "70%", "74%", "60% 56%"),
+      blob("rgba(96,72,200,0.45)", "88%", "22%", "50% 50%"),
+      { image: "linear-gradient(140deg, rgba(14,6,22,0.55), transparent 48%, rgba(10,4,18,0.88))" },
+    ],
+  },
+  {
+    id: "magma-dusk",
+    name: "Magma Dusk",
+    category: "aurora",
+    note: "Gold fracture running through cooling rock.",
+    base: "#0d0a08",
+    grain: 0.07,
+    layers: [
+      { image: "linear-gradient(74deg, transparent 44%, rgba(255,196,84,0.85) 49%, rgba(255,120,40,0.7) 51%, transparent 57%)" },
+      blob("rgba(255,142,48,0.45)", "48%", "52%", "58% 52%"),
+      blob("rgba(122,32,12,0.55)", "12%", "88%", "60% 54%"),
+      vignette("rgba(6,4,3,0.94)", "24%", "130% 110%"),
+    ],
+  },
+  {
+    id: "glacier-wash",
+    name: "Glacier Wash",
+    category: "aurora",
+    note: "Pale ice light washing across brushed steel.",
+    base: "#101820",
+    grain: 0.05,
+    layers: [
+      blob("rgba(186,226,255,0.50)", "30%", "22%", "70% 56%"),
+      blob("rgba(96,166,214,0.45)", "74%", "68%", "64% 58%"),
+      blob("rgba(246,252,255,0.20)", "52%", "44%", "40% 34%"),
+      { image: "linear-gradient(200deg, rgba(8,14,20,0.55), transparent 46%, rgba(6,10,16,0.9))" },
+    ],
+  },
+  {
+    id: "signal-haze",
+    name: "Signal Haze",
+    category: "aurora",
+    note: "Chartreuse signal burning through forest dark.",
+    base: "#060d07",
+    grain: 0.06,
+    layers: [
+      blob("rgba(190,255,72,0.52)", "66%", "34%", "58% 54%"),
+      blob("rgba(32,190,120,0.48)", "26%", "70%", "64% 58%"),
+      blob("rgba(226,255,180,0.18)", "52%", "50%", "38% 32%"),
+      { image: "linear-gradient(170deg, rgba(3,8,4,0.7), transparent 50%, rgba(2,6,3,0.92))" },
+    ],
+  },
+  {
+    id: "orchid-static",
+    name: "Orchid Static",
+    category: "aurora",
+    note: "Orchid bloom cut by fine horizontal static.",
+    base: "#120618",
+    grain: 0.04,
+    layers: [
+      blob("rgba(236,112,255,0.55)", "38%", "34%", "62% 58%"),
+      blob("rgba(112,84,255,0.48)", "74%", "70%", "60% 56%"),
+      {
+        image: "repeating-linear-gradient(180deg, rgba(255,255,255,0.07) 0 1px, transparent 1px 4px)",
+        size: "100% 4px",
+      },
+      { image: "linear-gradient(0deg, rgba(8,3,12,0.85), transparent 65%)" },
+    ],
+  },
+];

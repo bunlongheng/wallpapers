@@ -13,6 +13,8 @@
   --color-muted: #8a8780;
   /* Primary chrome text. 9.36:1 - the bright end of the metadata scale. */
   --color-label: #b5b1a8;
+  /* One tracking value for every 10px uppercase micro-label. */
+  --label-tracking: 0.2em;
   --color-safelight: #ff4a2b;
   --color-hair: rgba(242, 240, 235, 0.13);
 }
@@ -63,132 +65,164 @@ body {
   background-size: 800px 800px;
 }
 
-.display {
-  font-family: var(--font-display), Georgia, "Times New Roman", serif;
-  font-weight: 500;
-}
-
-.tag {
-  font-size: 0.625rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--color-muted);
-}
-
 /*
-  Category filtering is pure CSS - the recipes never have to reach the client. One
-  negation rule per category, so there is no second rule to lose a specificity fight
-  with. `data-filter="all"` matches none of them and everything stays visible.
+  These are component classes, so they belong in @layer components: an unlayered rule
+  beats every Tailwind utility, which silently made `text-white` on a `.tag` element a
+  no-op. Inside the layer, utilities win as expected.
 */
-[data-filter="aurora"] [data-cat]:not([data-cat="aurora"]),
-[data-filter="nature"] [data-cat]:not([data-cat="nature"]),
-[data-filter="leather"] [data-cat]:not([data-cat="leather"]),
-[data-filter="mono"] [data-cat]:not([data-cat="mono"]) {
-  display: none;
-}
+@layer components {
+  .display {
+    font-family: var(--font-display), Georgia, "Times New Roman", serif;
+    font-weight: 500;
+  }
 
-/*
-  Only a few tiles are on screen at once, but all 40 are in the document. This lets the
-  browser skip layout and paint for the off-screen ones until they scroll in, which is
-  what the LCP frame was waiting on.
-*/
-[data-cat] {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 380px 280px;
-}
+  .tag {
+    font-size: 0.625rem;
+    letter-spacing: var(--label-tracking);
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
 
-.plate {
-  display: block;
-  border: 1px solid var(--color-hair);
-  background: var(--color-ink-2);
-  transition: border-color 0.25s ease, transform 0.25s ease;
-}
-.plate:hover,
-.plate:focus-visible {
-  border-color: color-mix(in srgb, var(--color-safelight) 70%, transparent);
-  transform: translateY(-2px);
-}
-.plate:focus-visible {
-  outline: 2px solid var(--color-safelight);
-  outline-offset: 3px;
-}
-.plate .art {
-  transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.3, 1);
-}
-.plate:hover .art {
-  transform: scale(1.04);
-}
-.plate:hover .plate-no {
-  color: var(--color-safelight);
-}
+  /*
+    Category filtering is pure CSS - the recipes never have to reach the client. One
+    negation rule per category, so there is no second rule to lose a specificity fight
+    with. `data-filter="all"` matches none of them and everything stays visible.
+  */
+  [data-filter="aurora"] [data-cat]:not([data-cat="aurora"]),
+  [data-filter="nature"] [data-cat]:not([data-cat="nature"]),
+  [data-filter="leather"] [data-cat]:not([data-cat="leather"]),
+  [data-filter="mono"] [data-cat]:not([data-cat="mono"]) {
+    display: none;
+  }
 
-/*
-  Opacity only - animating transform too would promote every revealed element to its own
-  compositor layer, and with a mix-blend-mode child that means an offscreen surface each.
-*/
-/* Viewer controls sit over arbitrary plates, so they carry the house focus ring too. */
-.ctl:focus-visible {
-  outline: 2px solid var(--color-safelight);
-  outline-offset: 2px;
-}
+  /*
+    Only a few tiles are on screen at once, but all 40 are in the document. This lets the
+    browser skip layout and paint for the off-screen ones until they scroll in, which is
+    what the LCP frame was waiting on.
+  */
+  [data-cat] {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 380px 280px;
+  }
 
-/* A focused control must stay visible even after the idle timer fires. */
-.chrome:focus-within {
-  opacity: 1 !important;
-  pointer-events: auto !important;
-}
+  .plate {
+    display: block;
+    border: 1px solid var(--color-hair);
+    background: var(--color-ink-2);
+    transition: border-color 0.25s ease, transform 0.25s ease;
+  }
+  .plate:hover,
+  .plate:focus-visible {
+    border-color: color-mix(in srgb, var(--color-safelight) 70%, transparent);
+    transform: translateY(-2px);
+  }
+  .plate:focus-visible {
+    outline: 2px solid var(--color-safelight);
+    outline-offset: 3px;
+  }
+  .plate .art {
+    transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+  .plate:hover .art {
+    transform: scale(1.04);
+  }
+  .plate:hover .plate-no {
+    color: var(--color-safelight);
+  }
 
-.reveal {
-  animation: reveal 0.7s cubic-bezier(0.2, 0.7, 0.3, 1) both;
-}
-@keyframes reveal {
-  from {
+  /*
+    Opacity only - animating transform too would promote every revealed element to its own
+    compositor layer, and with a mix-blend-mode child that means an offscreen surface each.
+  */
+  /* Viewer controls sit over arbitrary plates, so they carry the house focus ring too. */
+  .ctl:focus-visible {
+    outline: 2px solid var(--color-safelight);
+    outline-offset: 2px;
+  }
+
+  /* A focused control must stay visible even after the idle timer fires. */
+  .chrome:focus-within {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  .reveal {
+    animation: reveal 0.7s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  }
+  @keyframes reveal {
+    from {
+      opacity: 0;
+    }
+  }
+
+  .chip {
+    border: 1px solid var(--color-hair);
+    padding: 0.5rem 0.9rem;
+    font-size: 0.625rem;
+    letter-spacing: var(--label-tracking);
+    text-transform: uppercase;
+    color: var(--color-label);
+    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+    cursor: pointer;
+  }
+  .chip:hover {
+    color: var(--color-paper);
+    border-color: color-mix(in srgb, var(--color-paper) 40%, transparent);
+  }
+  .chip[aria-pressed="true"] {
+    color: var(--color-ink);
+    background: var(--color-paper);
+    border-color: var(--color-paper);
+  }
+
+  /*
+    The count is a step quieter than its chip's label, but it has to stay above 4.5:1
+    against whichever ground the chip is on - which flips when the chip is pressed.
+  */
+  .chip .count {
+    color: var(--color-muted);
+  }
+  .chip[aria-pressed="true"] .count {
+    color: color-mix(in srgb, var(--color-ink) 72%, var(--color-paper));
+  }
+  .chip:focus-visible {
+    outline: 2px solid var(--color-safelight);
+    outline-offset: 2px;
+  }
+
+  /* Viewer chrome fades out so a screenshot can be taken of the wallpaper alone. */
+  .chrome {
+    transition: opacity 0.4s ease;
+  }
+  .chrome[data-hidden="true"] {
     opacity: 0;
+    pointer-events: none;
   }
 }
 
-.chip {
-  border: 1px solid var(--color-hair);
-  padding: 0.5rem 0.9rem;
-  font-size: 0.625rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--color-label);
-  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
-  cursor: pointer;
-}
-.chip:hover {
-  color: var(--color-paper);
-  border-color: color-mix(in srgb, var(--color-paper) 40%, transparent);
-}
-.chip[aria-pressed="true"] {
-  color: var(--color-ink);
-  background: var(--color-paper);
-  border-color: var(--color-paper);
-}
-
 /*
-  The count is a step quieter than its chip's label, but it has to stay above 4.5:1
-  against whichever ground the chip is on - which flips when the chip is pressed.
+  Viewer chrome bars. The safe-area maths lives here rather than inline so the wider
+  padding at the sm breakpoint still applies on every side.
 */
-.chip .count {
-  color: var(--color-muted);
-}
-.chip[aria-pressed="true"] .count {
-  color: color-mix(in srgb, var(--color-ink) 72%, var(--color-paper));
-}
-.chip:focus-visible {
-  outline: 2px solid var(--color-safelight);
-  outline-offset: 2px;
-}
-
-/* Viewer chrome fades out so a screenshot can be taken of the wallpaper alone. */
-.chrome {
-  transition: opacity 0.4s ease;
-}
-.chrome[data-hidden="true"] {
-  opacity: 0;
-  pointer-events: none;
+@layer components {
+  .bar {
+    --bar-pad: 1rem;
+    padding-left: max(var(--bar-pad), env(safe-area-inset-left));
+    padding-right: max(var(--bar-pad), env(safe-area-inset-right));
+  }
+  .bar-top {
+    padding-top: calc(var(--bar-pad) + env(safe-area-inset-top));
+    padding-bottom: var(--bar-pad);
+  }
+  .bar-bottom {
+    padding-top: var(--bar-pad);
+    padding-bottom: calc(var(--bar-pad) + env(safe-area-inset-bottom));
+  }
+  @media (min-width: 40rem) {
+    .bar {
+      --bar-pad: 1.5rem;
+    }
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

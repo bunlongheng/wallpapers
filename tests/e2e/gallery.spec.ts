@@ -1,28 +1,32 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { CATEGORIES } from "../../lib/categories";
+import { WALLPAPERS, wallpapersIn } from "../../lib/wallpapers";
 
-const CATEGORIES = ["aurora", "nature", "leather", "mono"] as const;
+// Specs run in Node, so the catalogue is the source of truth for every count here.
+const TOTAL = WALLPAPERS.length;
+const IDS = CATEGORIES.map((c) => c.id);
 
 test("the index lists every plate", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator("li[data-cat]")).toHaveCount(40);
+  await expect(page.locator("li[data-cat]")).toHaveCount(TOTAL);
   await expect(page.locator('li[data-cat="aurora"]').first()).toBeVisible();
 });
 
 // Each category is one branch of a single CSS selector list, so a typo in any one branch
 // hides the wrong tiles. Walking all four is both the coverage and the regression test.
-for (const cat of CATEGORIES) {
+for (const cat of IDS) {
   test(`filtering to ${cat} shows only ${cat}`, async ({ page }) => {
     await page.goto("/");
     await page.getByRole("button", { name: new RegExp(`^${cat}`, "i") }).click();
 
-    await expect(page.locator(`li[data-cat="${cat}"]`)).toHaveCount(10);
+    await expect(page.locator(`li[data-cat="${cat}"]`)).toHaveCount(wallpapersIn(cat).length);
     await expect(page.locator(`li[data-cat="${cat}"]`).first()).toBeVisible();
-    for (const other of CATEGORIES.filter((c) => c !== cat)) {
+    for (const other of IDS.filter((c) => c !== cat)) {
       await expect(page.locator(`li[data-cat="${other}"]`).first()).toBeHidden();
     }
     // Exactly the ten matching tiles are laid out - nothing leaks through.
-    await expect(page.locator("li[data-cat]:visible")).toHaveCount(10);
+    await expect(page.locator("li[data-cat]:visible")).toHaveCount(wallpapersIn(cat).length);
     await expect(page.getByRole("button", { name: new RegExp(`^${cat}`, "i") })).toHaveAttribute(
       "aria-pressed",
       "true",
@@ -36,12 +40,12 @@ test("All restores every plate", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /^mono/i }).click();
   await page.getByRole("button", { name: /^all/i }).click();
-  await expect(page.locator("li[data-cat]:visible")).toHaveCount(40);
+  await expect(page.locator("li[data-cat]:visible")).toHaveCount(TOTAL);
 });
 
 test("a category link opens already filtered", async ({ page }) => {
   await page.goto("/#leather");
-  await expect(page.locator("li[data-cat]:visible")).toHaveCount(10);
+  await expect(page.locator("li[data-cat]:visible")).toHaveCount(wallpapersIn("leather").length);
   await expect(page.locator('li[data-cat="leather"]').first()).toBeVisible();
 });
 
@@ -111,7 +115,23 @@ test.describe("production headers", () => {
   test("the shipped CSP carries no unsafe-eval", async ({ request }) => {
     const res = await request.get("/");
     const csp = res.headers()["content-security-policy"] ?? "";
-    expect(csp).toContain("frame-ancestors 'none'");
+    for (const directive of [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline'",
+      "font-src 'self'",
+      "img-src 'self' data:",
+      "connect-src 'self'",
+      "manifest-src 'self'",
+      "frame-src 'none'",
+      "worker-src 'none'",
+      "frame-ancestors 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "object-src 'none'",
+    ]) {
+      expect(csp).toContain(directive);
+    }
     expect(csp).not.toContain("unsafe-eval");
   });
 
@@ -124,6 +144,19 @@ test.describe("production headers", () => {
     await page.waitForLoadState("networkidle");
     expect(violations).toEqual([]);
   });
+});
+
+test("viewer chrome text stays white over the lightest plate", async ({ page }) => {
+  // axe marks text over a gradient as needs-review, so this is the only check that
+  // catches the chrome losing its colour to a cascade change.
+  await page.goto("/w/white-dune");
+  const tags = page.locator(".chrome .tag");
+  const count = await tags.count();
+  expect(count).toBeGreaterThan(0);
+  for (let i = 0; i < count; i++) {
+    const colour = await tags.nth(i).evaluate((el) => getComputedStyle(el).color);
+    expect(colour, `chrome .tag #${i}`).toMatch(/^rgba?\(255, 255, 255/);
+  }
 });
 
 test.describe("accessibility", () => {

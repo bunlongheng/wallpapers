@@ -5,7 +5,7 @@ import {
   getWallpaper,
   indexOf,
   wallpapersIn,
-  type Wallpaper,
+  type Recipe,
 } from "@/lib/wallpapers";
 
 const HEX = /^#[0-9a-f]{3,8}$/i;
@@ -45,6 +45,22 @@ describe("recipes are renderable", () => {
     }
   });
 
+  // The whole premise is that nothing is fetched. A url() in a layer would quietly
+  // reintroduce a network request and break the site's own Content-Security-Policy.
+  it("uses gradients only - never url(), an import, or a second declaration", () => {
+    for (const w of WALLPAPERS) {
+      for (const layer of w.layers) {
+        expect(layer.image, w.id).toMatch(
+          /^(repeating-)?(linear|radial|conic)-gradient\(/,
+        );
+        expect(layer.image, w.id).not.toMatch(/url\(|@import|expression\(|;/i);
+        for (const v of [layer.size, layer.position, layer.repeat]) {
+          if (v !== undefined) expect(v, w.id).not.toMatch(/url\(|;/i);
+        }
+      }
+    }
+  });
+
   it("uses a valid base colour", () => {
     for (const w of WALLPAPERS) expect(w.base).toMatch(HEX);
   });
@@ -59,7 +75,7 @@ describe("recipes are renderable", () => {
   });
 
   it("keeps every texture opacity inside 0..1", () => {
-    const opacities = (w: Wallpaper) => [w.grain, w.pebble, w.mottle];
+    const opacities = (w: Recipe) => [w.grain, w.pebble, w.mottle];
     for (const w of WALLPAPERS) {
       for (const o of opacities(w)) {
         if (o === undefined) continue;

@@ -1,12 +1,12 @@
 import type { CSSProperties } from "react";
-import type { Wallpaper as WallpaperDef } from "@/lib/wallpapers";
+import type { Recipe } from "@/lib/wallpapers";
 import { Scene } from "./Scene";
 
 /**
  * Paints one wallpaper recipe. The CSS layer stack is built as four parallel
  * comma-lists, which is why `Layer.image` is required to hold exactly one gradient.
  */
-export function Wallpaper({ w, className = "" }: { w: WallpaperDef; className?: string }) {
+export function Wallpaper({ w, className = "" }: { w: Recipe; className?: string }) {
   const style: CSSProperties = {
     backgroundColor: w.base,
     backgroundImage: w.layers.map((l) => l.image).join(", "),

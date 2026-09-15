@@ -12,10 +12,25 @@ type Filter = CategoryId | "all";
  */
 const subscribe = (onChange: () => void) => {
   window.addEventListener("hashchange", onChange);
-  return () => window.removeEventListener("hashchange", onChange);
+  window.addEventListener("popstate", onChange);
+  return () => {
+    window.removeEventListener("hashchange", onChange);
+    window.removeEventListener("popstate", onChange);
+  };
 };
 const readHash = () => window.location.hash.slice(1);
 const serverHash = () => "";
+
+/**
+ * "all" is the default, so it clears the fragment rather than writing `#all`.
+ * pushState keeps Back working without a navigation, but does not fire hashchange
+ * itself, so the store is nudged by hand.
+ */
+function choose(next: string) {
+  const url = next === "all" ? window.location.pathname : `#${next}`;
+  window.history.pushState(null, "", url);
+  window.dispatchEvent(new HashChangeEvent("hashchange"));
+}
 
 /**
  * Wraps the server-rendered grid and filters it with a data attribute, so the forty
@@ -25,7 +40,7 @@ export function CategoryFilter({
   counts,
   children,
 }: {
-  counts: Record<string, number>;
+  counts: Record<Filter, number>;
   children: React.ReactNode;
 }) {
   const hash = useSyncExternalStore(subscribe, readHash, serverHash);
@@ -46,9 +61,7 @@ export function CategoryFilter({
             type="button"
             className="chip"
             aria-pressed={filter === o.id}
-            onClick={() => {
-              window.location.hash = o.id;
-            }}
+            onClick={() => choose(o.id)}
           >
             {o.name}
             <span className="count ml-2">{counts[o.id] ?? 0}</span>

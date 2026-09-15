@@ -2,12 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { CategoryFilter } from "@/components/CategoryFilter";
 import { Wallpaper } from "@/components/Wallpaper";
-import { CATEGORIES } from "@/lib/categories";
 import { WALLPAPERS, wallpapersIn } from "@/lib/wallpapers";
 
-const counts: Record<string, number> = {
+const counts = {
   all: WALLPAPERS.length,
-  ...Object.fromEntries(CATEGORIES.map((c) => [c.id, wallpapersIn(c.id).length])),
+  aurora: wallpapersIn("aurora").length,
+  nature: wallpapersIn("nature").length,
+  leather: wallpapersIn("leather").length,
+  mono: wallpapersIn("mono").length,
 };
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -22,7 +24,6 @@ export default function Home() {
             alt=""
             width={40}
             height={40}
-            unoptimized
             className="h-10 w-10 rounded-[10px]"
           />
           <p className="tag">Index &middot; {WALLPAPERS.length} plates &middot; zero image assets</p>
