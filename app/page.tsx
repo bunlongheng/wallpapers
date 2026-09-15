@@ -19,11 +19,17 @@ export default function Home() {
     <main className="mx-auto w-full max-w-[1500px] px-5 pb-24 pt-10 sm:px-8 lg:px-12">
       <header className="reveal">
         <div className="flex items-center gap-3">
+          {/*
+            A static 80px file served straight from the CDN: no image-optimiser
+            function in the critical path, and eager because it sits above the fold.
+          */}
           <Image
-            src="/icon-192.png"
+            src="/icon-80.png"
             alt=""
             width={40}
             height={40}
+            unoptimized
+            loading="eager"
             className="h-10 w-10 rounded-[10px]"
           />
           <p className="tag">Index &middot; {WALLPAPERS.length} plates &middot; zero image assets</p>

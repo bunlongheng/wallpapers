@@ -7,6 +7,16 @@ import { WALLPAPERS, wallpapersIn } from "../../lib/wallpapers";
 const TOTAL = WALLPAPERS.length;
 const IDS = CATEGORIES.map((c) => c.id);
 
+/**
+ * Keyboard navigation is attached on hydration, so a key pressed before the bundle has
+ * run does nothing. Wait for the network to go quiet, which means the chunks have been
+ * fetched and executed.
+ */
+async function openPlate(page: import("@playwright/test").Page, id: string) {
+  await page.goto(`/w/${id}`);
+  await page.waitForLoadState("networkidle");
+}
+
 test("the index lists every plate", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("li[data-cat]")).toHaveCount(TOTAL);
@@ -50,7 +60,7 @@ test("a category link opens already filtered", async ({ page }) => {
 });
 
 test("a plate opens full-bleed and walks forward with the keyboard", async ({ page }) => {
-  await page.goto("/w/solar-drift");
+  await openPlate(page, "solar-drift");
   await expect(page.getByRole("heading", { name: "Solar Drift" })).toBeVisible();
 
   await page.keyboard.press("ArrowRight");
@@ -62,19 +72,19 @@ test("a plate opens full-bleed and walks forward with the keyboard", async ({ pa
 });
 
 test("Escape returns to the index", async ({ page }) => {
-  await page.goto("/w/vanguard");
+  await openPlate(page, "vanguard");
   await page.keyboard.press("Escape");
   await expect(page).toHaveURL(/\/$/);
 });
 
 test("the viewer wraps around at both ends of the catalogue", async ({ page }) => {
-  await page.goto("/w/solar-drift");
+  await openPlate(page, "solar-drift");
   await page.keyboard.press("ArrowLeft");
   await expect(page).toHaveURL(/\/w\/smoke-bands$/);
 });
 
 test("the chrome hides when idle and comes back on input", async ({ page }) => {
-  await page.goto("/w/alpine-dawn");
+  await openPlate(page, "alpine-dawn");
   const chrome = page.locator(".chrome");
   await expect(chrome).toHaveAttribute("data-hidden", "false");
   await expect(chrome).toHaveAttribute("data-hidden", "true", { timeout: 8000 });
@@ -101,11 +111,18 @@ test("the page does not scroll sideways on a phone", async ({ page }) => {
 /**
  * The reveal animation starts at opacity 0, and a contrast check sampled mid-fade reads
  * a blended foreground and reports a failure that does not exist once the page settles.
+ *
+ * Waiting on document.getAnimations() alone is racy - it is empty before the animations
+ * are created, so the wait can resolve instantly. Assert the end state instead.
  */
 async function settled(page: import("@playwright/test").Page) {
-  await page.waitForFunction(() =>
-    document.getAnimations().every((a) => a.playState === "finished" || a.playState === "idle"),
-  );
+  await page.waitForFunction(() => {
+    const fading = [...document.querySelectorAll(".reveal")];
+    if (!fading.every((el) => getComputedStyle(el).opacity === "1")) return false;
+    return document
+      .getAnimations()
+      .every((a) => a.playState === "finished" || a.playState === "idle");
+  });
 }
 
 // CI serves the production build, so this is the only place the shipped CSP is real.
@@ -160,6 +177,9 @@ test("viewer chrome text stays white over the lightest plate", async ({ page }) 
 });
 
 test.describe("accessibility", () => {
+  // A violation that passes on retry is still a violation - never mask one.
+  test.describe.configure({ retries: 0 });
+
   // white-dune is the lightest plate, so it is the hardest case for the viewer chrome.
   for (const path of ["/", "/w/solar-drift", "/w/white-dune"]) {
     test(`${path} has no axe violations`, async ({ page }) => {
