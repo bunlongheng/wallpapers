@@ -97,6 +97,21 @@ No database, no API keys, no services. It runs offline.
 | Back to the index | `Esc` |
 | Screenshot a plate clean | Open `/w/<id>` and stop moving the pointer - the chrome fades after 5s idle |
 
+### Demo mode
+
+Add `?demo=true` to the index and the page becomes a single full-bleed wallpaper that
+changes every 3 seconds. `&theme=<category>` limits it to one category.
+
+```
+https://wallpapers-bheng.vercel.app/?demo=true
+https://wallpapers-bheng.vercel.app/?demo=true&theme=nature
+```
+
+That is what makes this usable as a backdrop somewhere else - the
+[Emulator](https://github.com/bunlongheng/emulator) extension frames it behind its
+device shells, which is why `frame-ancestors` is open rather than `'none'`. The demo
+bundle is loaded lazily, so a normal visit to the index never downloads it.
+
 Every plate has a stable URL (`/w/solar-drift`, `/w/vanguard`, …) and all 45 pages are
 prerendered at build time, which makes them dependable fixtures for a visual-diff suite.
 
@@ -243,14 +258,16 @@ Every page is static, so it serves from the edge cache with no server work.
 Set in `next.config.ts` and applied to every response:
 
 - **CSP**: `default-src`, `font-src` and `connect-src` are `'self'`; `img-src` adds
-  `data:` for the noise tiles; `frame-src`, `worker-src`, `frame-ancestors` and
-  `object-src` are `'none'`. `script-src` and `style-src` are `'self' 'unsafe-inline'` -
+  `data:` for the noise tiles; `frame-src`, `worker-src` and `object-src` are `'none'`.
+  `frame-ancestors` is deliberately open, because the site is meant to be embedded as a
+  backdrop by other tools - framing is harmless here, since every page is static,
+  read-only, unauthenticated, and has no control whose activation does anything. `script-src` and `style-src` are `'self' 'unsafe-inline'` -
   every page is statically prerendered and Next inlines its own hydration payload, so a
   nonce would need per-request middleware that a static site does not have. There is no
   user input on the site. `'unsafe-eval'` is added **only** in the development phase,
   where React's dev build requires it; a production build never carries it, and an e2e
   test asserts that.
-- HSTS with preload, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`,
+- HSTS with preload, `X-Content-Type-Options: nosniff`,
   `Referrer-Policy: strict-origin-when-cross-origin`, and a `Permissions-Policy` that
   denies camera, microphone, geolocation and interest-cohort.
 - `poweredByHeader: false`.

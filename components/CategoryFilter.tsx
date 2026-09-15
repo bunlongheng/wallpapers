@@ -46,11 +46,7 @@ export function CategoryFilter({
   const hash = useSyncExternalStore(subscribe, readHash, serverHash);
   const filter: Filter = CATEGORIES.some((c) => c.id === hash) ? (hash as CategoryId) : "all";
 
-  const options: { id: Filter; name: string; blurb: string }[] = [
-    { id: "all", name: "All", blurb: "Every plate in the index" },
-    ...CATEGORIES,
-  ];
-  const active = options.find((o) => o.id === filter);
+  const options: { id: Filter; name: string }[] = [{ id: "all", name: "All" }, ...CATEGORIES];
 
   return (
     <>
@@ -68,7 +64,6 @@ export function CategoryFilter({
           </button>
         ))}
       </div>
-      <p className="tag mt-4">{active?.blurb}</p>
       <div data-filter={filter} className="mt-6">
         {children}
       </div>

@@ -144,7 +144,7 @@ test.describe("production headers", () => {
       "manifest-src 'self'",
       "frame-src 'none'",
       "worker-src 'none'",
-      "frame-ancestors 'none'",
+      "frame-ancestors *",
       "base-uri 'self'",
       "form-action 'self'",
       "object-src 'none'",
@@ -176,6 +176,52 @@ test("viewer chrome text stays white over the lightest plate", async ({ page }) 
     const colour = await tags.nth(i).evaluate((el) => getComputedStyle(el).color);
     expect(colour, `chrome .tag #${i}`).toMatch(/^rgba?\(255, 255, 255/);
   }
+});
+
+test.describe("demo mode", () => {
+  test("?demo=true&theme=nature shows only that category, full bleed", async ({ page }) => {
+    await page.goto("/?demo=true&theme=nature");
+    const plates = page.locator(".demo-plate");
+    await expect(plates).toHaveCount(wallpapersIn("nature").length);
+
+    // The grid must not be laid out underneath an embedded backdrop.
+    await expect(page.locator("main")).toBeHidden();
+
+    // Every plate has to occupy the same box. They used to stack vertically, because
+    // Wallpaper sets `relative` on its own root and a utility passed in from outside
+    // cannot override it - so only the first plate was ever on screen.
+    const boxes = await plates.evaluateAll((els) =>
+      els.map((e) => {
+        const r = e.getBoundingClientRect();
+        return `${r.x},${r.y},${Math.round(r.width)},${Math.round(r.height)}`;
+      }),
+    );
+    expect(new Set(boxes).size).toBe(1);
+
+    const vp = page.viewportSize()!;
+    expect(boxes[0]).toBe(`0,0,${vp.width},${vp.height}`);
+  });
+
+  test("it advances to the next plate on its own", async ({ page }) => {
+    await page.goto("/?demo=true&theme=nature");
+    const active = () =>
+      page.locator(".demo-plate").evaluateAll((els) =>
+        els.findIndex((e) => e.classList.contains("is-on")),
+      );
+    await expect.poll(active).toBe(0);
+    await expect.poll(active, { timeout: 6000 }).toBe(1);
+  });
+
+  test("without a theme it rotates the whole catalogue", async ({ page }) => {
+    await page.goto("/?demo=true");
+    await expect(page.locator(".demo-plate")).toHaveCount(TOTAL);
+  });
+
+  test("the index is untouched without the flag", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator(".demo-plate")).toHaveCount(0);
+    await expect(page.locator("main")).toBeVisible();
+  });
 });
 
 test.describe("accessibility", () => {

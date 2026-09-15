@@ -42,7 +42,7 @@ export default async function WallpaperPage({ params }: Params) {
       prev={{ id: prev.id, name: prev.name }}
       next={{ id: next.id, name: next.name }}
     >
-      <Wallpaper w={w} className="absolute inset-0 h-full w-full" />
+      <Wallpaper w={w} className="h-full w-full" />
     </Viewer>
   );
 }

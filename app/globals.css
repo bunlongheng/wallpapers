@@ -1,26 +1,29 @@
 @import "tailwindcss";
 
 /*
-  Darkroom archive: the wallpapers carry every colour, so the chrome around them is
-  near-black, hairline-ruled, and set in a didone / mono pair. One accent only - the
-  red of a darkroom safelight.
+  Gallery wall, not a darkroom: the plates carry every colour, so the page around them
+  is paper-white, hairline-ruled, and set in a didone / mono pair. One accent only.
+  Every value below is contrast-checked against the ground it actually sits on.
 */
 @theme {
-  --color-ink: #08080a;
-  --color-ink-2: #0e0e11;
-  --color-paper: #f2f0eb;
-  /* Secondary text. 5.58:1 on ink - AA at any size. */
-  --color-muted: #8a8780;
-  /* Primary chrome text. 9.36:1 - the bright end of the metadata scale. */
-  --color-label: #b5b1a8;
+  /* Page ground, and the slightly cooler card behind a plate. */
+  --color-bg: #f4f2ed;
+  --color-tile: #eceae4;
+  /* Primary text. 16.5:1 on the page. */
+  --color-fg: #14140f;
+  /* Secondary text. 6.3:1 on the page, 5.9:1 on a tile - AA at any size. */
+  --color-muted: #5c584e;
   /* One tracking value for every 10px uppercase micro-label. */
   --label-tracking: 0.2em;
+  /* The accent, for marks and rules only - 3.0:1, so never for text. */
   --color-safelight: #ff4a2b;
-  --color-hair: rgba(242, 240, 235, 0.13);
+  /* The accent darkened to 4.9:1, for when it has to carry text. */
+  --color-safelight-ink: #c23520;
+  --color-hair: rgba(20, 20, 15, 0.14);
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 html {
@@ -28,8 +31,8 @@ html {
 }
 
 body {
-  background: var(--color-ink);
-  color: var(--color-paper);
+  background: var(--color-bg);
+  color: var(--color-fg);
   font-family: var(--font-mono), ui-monospace, "SFMono-Regular", monospace;
   -webkit-font-smoothing: antialiased;
 }
@@ -107,7 +110,7 @@ body {
   .plate {
     display: block;
     border: 1px solid var(--color-hair);
-    background: var(--color-ink-2);
+    background: var(--color-tile);
     transition: border-color 0.25s ease, transform 0.25s ease;
   }
   .plate:hover,
@@ -145,6 +148,20 @@ body {
     pointer-events: auto !important;
   }
 
+  /* Demo mode owns the viewport - the index underneath is not laid out at all. */
+  [data-demo="on"] main {
+    display: none;
+  }
+
+  /* Demo mode cross-fades between plates; only the active one is at full opacity. */
+  .demo-plate {
+    opacity: 0;
+    transition: opacity 900ms ease-in-out;
+  }
+  .demo-plate.is-on {
+    opacity: 1;
+  }
+
   .reveal {
     animation: reveal 0.7s cubic-bezier(0.2, 0.7, 0.3, 1) both;
   }
@@ -160,18 +177,18 @@ body {
     font-size: 0.625rem;
     letter-spacing: var(--label-tracking);
     text-transform: uppercase;
-    color: var(--color-label);
+    color: var(--color-fg);
     transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
     cursor: pointer;
   }
   .chip:hover {
-    color: var(--color-paper);
-    border-color: color-mix(in srgb, var(--color-paper) 40%, transparent);
+    color: var(--color-fg);
+    border-color: color-mix(in srgb, var(--color-fg) 45%, transparent);
   }
   .chip[aria-pressed="true"] {
-    color: var(--color-ink);
-    background: var(--color-paper);
-    border-color: var(--color-paper);
+    color: var(--color-bg);
+    background: var(--color-fg);
+    border-color: var(--color-fg);
   }
 
   /*
@@ -182,7 +199,7 @@ body {
     color: var(--color-muted);
   }
   .chip[aria-pressed="true"] .count {
-    color: color-mix(in srgb, var(--color-ink) 72%, var(--color-paper));
+    color: color-mix(in srgb, var(--color-bg) 78%, var(--color-fg));
   }
   .chip:focus-visible {
     outline: 2px solid var(--color-safelight);

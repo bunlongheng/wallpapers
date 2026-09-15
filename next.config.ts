@@ -26,7 +26,11 @@ const csp = (dev: boolean) =>
     // rather than letting them inherit default-src 'self'.
     "frame-src 'none'",
     "worker-src 'none'",
-    "frame-ancestors 'none'",
+    // Embeddable on purpose: the site is a wallpaper backdrop for other tools (the
+    // Emulator extension frames it behind its device shells). Framing carries no
+    // clickjacking risk here - every page is static, read-only, unauthenticated, and
+    // has no control whose activation does anything.
+    "frame-ancestors *",
     "base-uri 'self'",
     "form-action 'self'",
     "object-src 'none'",
@@ -45,7 +49,6 @@ const nextConfig = (phase: string): NextConfig => ({
         headers: [
           { key: "Content-Security-Policy", value: csp(phase === PHASE_DEVELOPMENT_SERVER) },
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
-          { key: "X-Frame-Options", value: "DENY" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
